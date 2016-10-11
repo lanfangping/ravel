@@ -7,14 +7,14 @@ def blacklist():
     blocked = [("10.0.0.1", "10.0.0.2"),
                ("10.0.0.3", "10.0.0.4")]
 
-    return ~union([(match(srcip=ip1) &
-                    match(dstip=ip2)) |
-                   (match(dstip=ip1) &
-                    match(srcip=ip2))
-                   for (ip1, ip2)
-                   in blocked])
+    return union([(match(srcip=ip1) &
+                   match(dstip=ip2)) |
+                  (match(dstip=ip1) &
+                   match(srcip=ip2))
+                  for (ip1, ip2)
+                  in blocked])
 
 def main():
-    return blacklist() >> flood()
+    return blacklist() >> drop
 
 
