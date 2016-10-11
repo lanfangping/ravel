@@ -111,7 +111,7 @@ class RavelConsole(cmd.Cmd):
 
             status = "\033[91m[offline]\033[0m"
             if app.name in self.env.loaded:
-                status = "\033[92m[online]\033[0m"
+                status = "\033[92m[online] \033[0m"
             if app.shortcut:
                 shortcut = " ({0})".format(app.shortcut)
             if app.description:

@@ -1,4 +1,3 @@
-import cmd
 from ravel.app import AppConsole
 
 class FirewallConsole(AppConsole):
