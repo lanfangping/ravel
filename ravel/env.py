@@ -95,8 +95,17 @@ class Environment(object):
            cmds: string containing the command(s) to pass to xterm
            cmdfile: if the command requires a temporary file, a path
            to the file, which should be deleted when the environment stops"""
+
+        def preexec_fn():
+            # don't forward signals to child process
+            # we need this when starting xterm subprocesses, so that SIGINTs
+            # from the CLI aren't forwarded, causing the watch terminal to
+            # close early
+            os.setpgrp()
+
         p = subprocess.Popen(cmds,
                              shell=True,
+                             preexec_fn=preexec_fn,
                              stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE)
 

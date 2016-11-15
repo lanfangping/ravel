@@ -33,12 +33,6 @@ OFPP_CONTROLLER = 65533
 OFPP_LOCAL = 65534
 OFPP_NONE = 65535
 
-def preexec_fn():
-    # don't forward signals to child process
-    # we need this when starting a Pox subprocess, so that SIGINTs from the CLI
-    # aren't forwarded to Pox, causing it to terminate early
-    os.setpgrp()
-
 class OfManager(object):
     """Manange communication with an OpenFlow controller.  The manager receives
        flow modification messages from the database triggers on changes to
@@ -117,6 +111,13 @@ class PoxInstance(object):
         env = os.environ.copy()
         env["PYTHONPATH"] = ":".join(sys.path)
         logger.debug("pox with params: %s", " ".join(cargs))
+
+        def preexec_fn():
+            # don't forward signals to child process
+            # we need this when starting a Pox subprocess, so that SIGINTs from the CLI
+            # aren't forwarded to Pox, causing it to terminate early
+            os.setpgrp()
+
         self.proc = subprocess.Popen([pox] + cargs,
                                      env=env,
                                      preexec_fn = preexec_fn,
