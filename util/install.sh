@@ -56,8 +56,8 @@ function ravel {
     $addrepo ppa:georepublic/pgrouting
     $update
     $install postgresql-contrib postgresql-client \
-	python-psycopg2 python-igraph postgis postgresql-plpython-9.3 \
-	postgresql-9.3-pgrouting postgresql-9.3-plsh
+	python-psycopg2 python-igraph postgis postgresql-plpython \
+	postgresql-9.5-pgrouting postgresql-9.5-plsh
 
     sudo -u postgres psql -c "CREATE DATABASE ravel;"
     sudo -u postgres psql -c "CREATE USER ravel WITH SUPERUSER;"
