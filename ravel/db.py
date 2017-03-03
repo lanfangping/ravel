@@ -135,11 +135,26 @@ class RavelDb():
                                     "VALUES ({1}, {0}, {2}, {3});"
                                     .format(sid, nid, ishost, 1))
 
-                self.cursor.execute("INSERT INTO ports(sid, nid, port) "
-                                    "VALUES ({0}, {1}, {2}), ({1}, {0}, {3});"
-                                    .format(sid, nid,
-                                            topo.port(h1, h2)[0],
-                                            topo.port(h1, h2)[1]))
+                try:
+                    intf1 = ""
+                    intf2 = ""
+                    if h1 in topo.switches():
+                        intf1 = provider.getNodeByName(h1).intfs[topo.port(h1, h2)[0]]
+                    if h2 in topo.switches():
+                        intf2 = provider.getNodeByName(h2).intfs[topo.port(h2, h1)[0]]
+
+                    self.cursor.execute("INSERT INTO ports(sid, nid, port, intf) "
+                                        "VALUES ({0}, {1}, {2}, '{4}'), ({1}, {0}, {3}, '{5}');"
+                                        .format(sid, nid,
+                                                topo.port(h1, h2)[0],
+                                                topo.port(h1, h2)[1],
+                                                intf1, intf2))
+                except AttributeError:
+                    self.cursor.execute("INSERT INTO ports(sid, nid, port) "
+                                        "VALUES ({0}, {1}, {2}), ({1}, {0}, {3});"
+                                        .format(sid, nid,
+                                                topo.port(h1, h2)[0],
+                                                topo.port(h1, h2)[1]))
 
         except psycopg2.DatabaseError, e:
             logger.warning("error loading topology: %s", self.fmt_errmsg(e))

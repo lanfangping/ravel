@@ -116,7 +116,8 @@ DROP TABLE IF EXISTS ports CASCADE;
 CREATE UNLOGGED TABLE ports (
        sid      integer,
        nid      integer,
-       port     integer
+       port     integer,
+       intf	varchar(16)
 );
 
 

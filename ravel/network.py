@@ -256,10 +256,18 @@ class MininetProvider(NetworkProvider):
 
         port1, port2 = self.net.topo.port(name1, name2)
         cursor = self.db.cursor
-        cursor.execute("INSERT INTO PORTS (sid, nid, port) "
-                       "VALUES ({0}, {1}, {2}), ({1}, {0}, {3});"
+        intf1 = ""
+        intf2 = ""
+        if self.net.topo.isSwitch(name1):
+            intf1 = self.net.topo.get(name1).intfs[port1]
+        if self.net.topo.isSwitch(name2):
+            intf2 = self.net.topo.get(name2).intfs[port2]
+
+        cursor.execute("INSERT INTO PORTS (sid, nid, port, intf) "
+                       "VALUES ({0}, {1}, {2}, '{4}'), ({1}, {0}, {3}, '{5}');"
                        .format(msg.node1, msg.node2,
-                               port1, port2))
+                               port1, port2,
+                               intf1, intf2))
 
     def removeLink(self, msg):
         """Remove a link from the Mininet topology
