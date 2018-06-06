@@ -68,7 +68,7 @@ class FirewallConsole(AppConsole):
         try:
             self.db.cursor.execute("INSERT INTO FW_policy_acl VALUES "
                                    "({0},{1},1);"
-                                   .format(src, dst));
+                                   .format(src, dst))
         except Exception, e:
             print "Failure: flow not added --", e
             return
@@ -91,7 +91,7 @@ class FirewallConsole(AppConsole):
         try:
             self.db.cursor.execute("DELETE FROM FW_policy_acl VALUES WHERE "
                                    "end1={0} AND end2={1};"
-                                   .format(src, dst));
+                                   .format(src, dst))
         except Exception, e:
             print "Failure: flow not removed --", e
             return
