@@ -24,11 +24,11 @@ CREATE OR REPLACE VIEW bgp_violation AS (
        SELECT bgp_policy.dest, routes.dest AS routes_dest,
               bgp_policy.path, routes.path AS routes_dest,
               bgp_policy.min_len, l(routes.path) AS routes_len_path,
-              array_cat(bgp_policy.condition, ARRAY(
+              array_cat(bgp_policy.condition, ARRAY[
                             bgp_policy.dest || ' == ' || routes.dest, 
                             bgp_policy.path || ' == ' || routes.path,
                             'l(' || bgp_policy.path || ') == ' || l(routes.path)
-                     )
+                     ]
               ) AS condition 
        FROM bgp_policy, routes 
        WHERE equal(bgp_policy.dest, routes.dest) 
