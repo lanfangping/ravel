@@ -1,9 +1,9 @@
 from ravel.app import AppConsole
 
-class TestConsole(AppConsole):
-    def do_test(self):
+class SppConsole(AppConsole):
+    def do_echo(self):
         print("test")
 
-shortcut = "test"
+shortcut = "tt"
 description = "Test: shortest path policy"
-console = TestConsole
+console = SppConsole
