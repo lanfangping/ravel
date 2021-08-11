@@ -1,8 +1,8 @@
 from ravel.app import AppConsole
 
 class SppConsole(AppConsole):
-    def do_echo(self):
-        print("test")
+    def do_echo(self, line):
+        print("test", line)
     
     def do_adddata(self, line):
         args = line.split()
