@@ -1,6 +1,6 @@
 from ravel.app import AppConsole
 
-class SppConsole(AppConsole):
+class BGPConsole(AppConsole):
     def do_echo(self, line):
         print("test", line)
     
@@ -17,4 +17,4 @@ class SppConsole(AppConsole):
 
 shortcut = "bgp"
 description = "BGP simulation"
-console = SppConsole
+console = BGPConsole
