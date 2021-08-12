@@ -22,7 +22,9 @@ CREATE UNLOGGED TABLE bgp_policy (
 
 /* Violation: */
 CREATE OR REPLACE VIEW bgp_violation AS (
-       SELECT bgp_policy.dest, routes.dest AS routes_dest,
+       SELECT 
+              routes.fid,
+              bgp_policy.dest, routes.dest AS routes_dest,
               bgp_policy.path, routes.path AS routes_path,
               bgp_policy.min_len, l(routes.path) AS routes_len_path,
               array_cat(bgp_policy.condition, ARRAY[
@@ -41,4 +43,4 @@ CREATE OR REPLACE VIEW bgp_violation AS (
 CREATE OR REPLACE RULE bgp_repair AS
        ON DELETE TO bgp_violation
        DO INSTEAD
-          DELETE FROM routes where dest = OLD.dest AND path = OLD.path;
+          DELETE FROM routes where fid = OLD.fid;

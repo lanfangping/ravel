@@ -8,9 +8,9 @@
  */
 DROP TABLE IF EXISTS routes CASCADE;
 CREATE UNLOGGED TABLE routes (
+       fid SERIAL PRIMARY key,
        dest TEXT,
-       path TEXT,
-       PRIMARY key(dest, path)
+       path TEXT
 );
 
 /* Routes Updates -- from UPDATE files
@@ -21,6 +21,7 @@ CREATE UNLOGGED TABLE routes (
  */
 DROP TABLE IF EXISTS routes_delta CASCADE;
 CREATE UNLOGGED TABLE routes_delta (
+       fid SERIAL PRIMARY key,
        dest TEXT,
        operation TEXT,
        path TEXT,
