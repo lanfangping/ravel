@@ -16,7 +16,8 @@ CREATE UNLOGGED TABLE bgp_policy (
        dest TEXT,
        path TEXT,
        min_len integer,
-       condition TEXT[]
+       condition TEXT[],
+       PRIMARY key(dest, path)
 );
 
 /* Violation: */
@@ -31,7 +32,7 @@ CREATE OR REPLACE VIEW bgp_violation AS (
                      ]
               ) AS condition 
        FROM bgp_policy, routes 
-       WHERE equal(bgp_policy.dest, routes.dest) 
+       WHERE equal(bgp_policy.dest, outres.dest) 
        AND equal(bgp_policy.path, routes.path) 
        AND is_contradiction(condition) 
 );

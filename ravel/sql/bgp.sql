@@ -9,7 +9,8 @@
 DROP TABLE IF EXISTS routes CASCADE;
 CREATE UNLOGGED TABLE routes (
        dest TEXT,
-       path TEXT
+       path TEXT,
+       PRIMARY key(dest, path)
 );
 
 /* Routes Updates -- from UPDATE files
