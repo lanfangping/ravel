@@ -40,4 +40,5 @@ CREATE OR REPLACE VIEW bgp_violation AS (
 /* Repair */
 CREATE OR REPLACE RULE bgp_repair AS
        ON DELETE TO bgp_violation
-       DO NOTHING;
+       DO INSTEAD
+          DELETE FROM routes where dest = OLD.dest AND path = OLD.path;
