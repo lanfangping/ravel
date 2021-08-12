@@ -1,7 +1,7 @@
 from ravel.app import AppConsole
 
-rib_file = '../topo/RouteView/rib.txt'
-upd_file = '../topo/RouteView/update.txt'
+rib_file = './topo/RouteView/rib.txt'
+upd_file = './topo/RouteView/update.txt'
 
 class BGPConsole(AppConsole):
     def do_echo(self, line):
