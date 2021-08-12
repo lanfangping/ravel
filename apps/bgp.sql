@@ -32,7 +32,7 @@ CREATE OR REPLACE VIEW bgp_violation AS (
                      ]
               ) AS condition 
        FROM bgp_policy, routes 
-       WHERE equal(bgp_policy.dest, outres.dest) 
+       WHERE equal(bgp_policy.dest, routes.dest) 
        AND equal(bgp_policy.path, routes.path) 
        AND is_contradiction(condition) 
 );
