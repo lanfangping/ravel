@@ -1,4 +1,3 @@
-from _typeshed import Self
 from ravel.app import AppConsole
 
 rib_file = '../topo/RouteView/rib.txt'
@@ -198,3 +197,7 @@ class BGPConsole(AppConsole):
 shortcut = "bgp"
 description = "BGP simulation"
 console = BGPConsole
+
+if __name__ == '__main__':
+    bgp = BGPConsole()
+    bgp.do_loaddata()
