@@ -17,8 +17,8 @@ class BGPConsole(AppConsole):
         # upd_file = args[1]
         ptable, rtable, update_table = self.gen_ptable()
         self.db.cursor.executemany("INSERT INTO bgp_policy VALUES (%s, %s, %s, %s);", ptable)
-        self.db.cursor.executemany("INSERT INTO routes VALUES (%s, %s);", rtable)
-        self.db.cursor.executemany("INSERT INTO routes_delta VALUES (%s, %s, %s, %s);", update_table)
+        self.db.cursor.executemany("INSERT INTO routes(dest, path) VALUES (%s, %s);", rtable)
+        self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
 
         
 
