@@ -7,7 +7,7 @@ class BGPConsole(AppConsole):
     def do_echo(self, line):
         print("test", line)
     
-    def do_loaddata(self):
+    def do_loaddata(self,line):
         # args = line.split()
         # if len(args) != 2:
         #     print("Invalid syntax") 
