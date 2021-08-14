@@ -196,7 +196,7 @@ class RelaAlgConsole(AppConsole):
                         #result += f"UPDATE {t_result} SET cond = array_append(cond, {or_exp})  WHERE is_var({t_result}.{l_list[idx]}) Or is_var({t_result}.{r_list[idx]}); \n"
 
                         if "'" in r_list[idx] or "'" in l_list[idx]:
-                            q = "UPDATE {} SET cond = array_append(cond, 'Or(' || {} || ')' ) ; \n".format(t_result, or_exp)
+                            q = "UPDATE {} SET condition = array_append(condition, 'Or(' || {} || ')' ) ; \n".format(t_result, or_exp)
 
                         else: 
                             q = ''
@@ -245,7 +245,7 @@ class RelaAlgConsole(AppConsole):
                     if 'not_equal' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = "UPDATE {} SET cond = array_append(cond, {} ||' != '|| {}); \n".format(t_result, left, right)
+                            q = "UPDATE {} SET condition = array_append(condition, {} ||' != '|| {}); \n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -258,7 +258,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'equal' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = "UPDATE {} SET cond = array_append(cond, {} ||' == '|| {}) ;\n".format(t_result, left, right)
+                            q = "UPDATE {} SET condition = array_append(condition, {} ||' == '|| {}) ;\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -271,7 +271,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'greater' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = "UPDATE {} SET cond = array_append(cond, {} ||' > '|| {}) ;\n".format(t_result, left, right)
+                            q = "UPDATE {} SET condition = array_append(condition, {} ||' > '|| {}) ;\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -284,7 +284,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'less' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = "UPDATE {} SET cond = array_append(cond, {} ||' < '|| {});\n".format(t_result, left, right)
+                            q = "UPDATE {} SET condition = array_append(condition, {} ||' < '|| {});\n".format(t_result, left, right)
 
                         else:
                             q = ''
@@ -298,7 +298,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'geq' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = "UPDATE {} SET cond = array_append(cond, {} ||' >= '|| {}) ;\n".format(t_result, left, right)
+                            q = "UPDATE {} SET condition = array_append(condition, {} ||' >= '|| {}) ;\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -311,7 +311,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'leq' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = "UPDATE {} SET cond = array_append(cond, {} ||' <= '|| {});\n".format(t_result, left, right)
+                            q = "UPDATE {} SET condition = array_append(condition, {} ||' <= '|| {});\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -326,13 +326,13 @@ class RelaAlgConsole(AppConsole):
         result +=  "Step3: Normalization\n"
         print("\nStep3: Normalization\n")
 
-        q_contra = "DELETE FROM {} WHERE is_contradiction({}.cond);\n".format(t_result, t_result)
+        q_contra = "DELETE FROM {} WHERE is_contradiction({}.condition);\n".format(t_result, t_result)
 
         print(q_contra)
         # execute postgres SQL
         self.db.cursor.execute(q_contra)
 
-        q_tauto = "UPDATE {} SET cond = '{{}}' WHERE is_tauto({}.cond);\n".format(t_result, t_result)
+        q_tauto = "UPDATE {} SET condition = '{{}}' WHERE is_tauto({}.condition);\n".format(t_result, t_result)
 
         print(q_tauto)
         # execute postgres SQL
@@ -341,7 +341,7 @@ class RelaAlgConsole(AppConsole):
         result += q_contra + q_tauto
         
 
-        q_rm = "UPDATE {} SET cond = remove_redundant(cond) where has_redundant(cond);\n".format(t_result)
+        q_rm = "UPDATE {} SET condition = remove_redundant(condition) where has_redundant(condition);\n".format(t_result)
         result += q_rm
 
         print(q_rm)
@@ -374,7 +374,7 @@ class RelaAlgConsole(AppConsole):
         t2_attr =  re.findall(p2, table2_info)[0].strip().split(',')
         t2_attr = [v.strip() for v in t2_attr ]
 
-        common_attr=[val for val in t1_attr if val in t2_attr and val != 'cond']
+        common_attr=[val for val in t1_attr if val in t2_attr and val != 'condition']
         union_attr = list(set(t1_attr).union(set(t2_attr)))
         result += "Step1: Create Data Content\n"
         print("Step1: Create Data Content\n")
@@ -389,23 +389,23 @@ class RelaAlgConsole(AppConsole):
         slt_attr = ""
 
         for a in t1_attr:
-            if a not in common_attr and a != "cond":
+            if a not in common_attr and a != "condition":
                 slt_attr += " {}.{}, ".format(table1, a)
         
         for a in t2_attr:
-            if a not in common_attr and a != "cond":
+            if a not in common_attr and a != "condition":
                 slt_attr += "{}.{},".format(table2, a)
 
         for a in common_attr:
             slt_attr += "{}.{}, {}.{} AS {}_{},".format(table1, a, table2, a, table2, a)
 
-        if "cond" in t1_attr and "cond" in t2_attr:
-            slt_attr += "array_cat({}.cond, {}.cond) AS cond,".format(table1, table2)
+        if "condition" in t1_attr and "condition" in t2_attr:
+            slt_attr += "array_cat({}.condition, {}.condition) AS condition,".format(table1, table2)
             #slt_attr += f" {table1}.cond AS cond, {table2}.cond AS {table2}_cond,"
-        elif "cond" in t1_attr:
-            slt_attr += " {}.cond AS cond,".format(table1)
-        elif "cond" in t2_attr:
-            slt_attr += " {}.cond AS {}_cond,".format(table2, table2)
+        elif "condition" in t1_attr:
+            slt_attr += " {}.condition AS condition,".format(table1)
+        elif "condition" in t2_attr:
+            slt_attr += " {}.condition AS {}condition,".format(table2, table2)
 
         slt_attr = slt_attr[:-1]
 
@@ -454,7 +454,7 @@ class RelaAlgConsole(AppConsole):
         print("\n2.1: Insert Join Conditions\n")
         for attr in common_attr:
             #result += f"UPDATE {t_result} SET cond = array_append(cond, {attr} || ' == ' || {table2}_{attr})  WHERE  (is_var({t_result}.{attr}) OR is_var({t_result}.{table2}_{attr}) );"
-            sql = "UPDATE {} SET cond = array_append(cond, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
+            sql = "UPDATE {} SET condition = array_append(condition, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
             result += sql
 
             print(sql)
