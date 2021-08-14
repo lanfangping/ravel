@@ -21,11 +21,14 @@ class RelaAlgConsole(AppConsole):
             return
 
         try:
+            print('************************************************************************')
+            print(line)
             self.db.cursor.execute("select * from output;")
             data = self.db.cursor.fetchall()
             if data is not None:
                 names = [row[0] for row in self.db.cursor.description]
                 print(tabulate.tabulate(data, headers=names))
+            print('************************************************************************')
         except psycopg2.ProgrammingError:
             # no results, eg from an insert/delete
             pass
