@@ -20,16 +20,17 @@ class RelaAlgConsole(AppConsole):
             print(e)
             return
 
-        # try:
-        #     data = self.db.cursor.fetchall()
-        #     if data is not None:
-        #         names = [row[0] for row in self.db.cursor.description]
-        #         print(tabulate.tabulate(data, headers=names))
-        # except psycopg2.ProgrammingError:
-        #     # no results, eg from an insert/delete
-        #     pass
-        # except TypeError as e:
-        #     print(e)
+        try:
+            self.db.cursor.execute("select * from output;")
+            data = self.db.cursor.fetchall()
+            if data is not None:
+                names = [row[0] for row in self.db.cursor.description]
+                print(tabulate.tabulate(data, headers=names))
+        except psycopg2.ProgrammingError:
+            # no results, eg from an insert/delete
+            pass
+        except TypeError as e:
+            print(e)
     def _get_sql(self, query):
         #print("INPUT: " + query + "\n")
         #t_result = 't_result'
