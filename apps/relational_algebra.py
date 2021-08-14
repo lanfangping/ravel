@@ -88,9 +88,9 @@ class RelaAlgConsole(AppConsole):
             result = ""
             
             result += "Step1: Create data content\n"
-            result += f"DROP TABLE IF EXISTS {t_result}; \n"
+            result += "DROP TABLE IF EXISTS {}; \n".format(t_result)
     
-            q1 = f"CREATE UNLOGGED TABLE {t_result} AS {query} \n"
+            q1 = "CREATE UNLOGGED TABLE {} AS {} \n".format(t_result, query)
             result+=q1
             if where == None:
                 #result = query
@@ -183,7 +183,7 @@ class RelaAlgConsole(AppConsole):
                         #result += f"UPDATE {t_result} SET cond = array_append(cond, {or_exp})  WHERE is_var({t_result}.{l_list[idx]}) Or is_var({t_result}.{r_list[idx]}); \n"
 
                         if "'" in r_list[idx] or "'" in l_list[idx]:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, 'Or(' || {or_exp} || ')' ) ; \n"
+                            q = "UPDATE {} SET cond = array_append(cond, 'Or(' || {} || ')' ) ; \n".format(t_result, or_exp)
 
                         else: 
                             q = ''
@@ -225,7 +225,7 @@ class RelaAlgConsole(AppConsole):
                     if 'not_equal' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, {left} ||' != '|| {right}); \n"
+                            q = "UPDATE {} SET cond = array_append(cond, {} ||' != '|| {}); \n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -233,7 +233,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'equal' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, {left} ||' == '|| {right}) ;\n"
+                            q = "UPDATE {} SET cond = array_append(cond, {} ||' == '|| {}) ;\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -241,7 +241,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'greater' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, {left} ||' > '|| {right}) ;\n"
+                            q = "UPDATE {} SET cond = array_append(cond, {} ||' > '|| {}) ;\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -249,7 +249,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'less' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, {left} ||' < '|| {right});\n"
+                            q = "UPDATE {} SET cond = array_append(cond, {} ||' < '|| {});\n".format(t_result, left, right)
 
                         else:
                             q = ''
@@ -258,7 +258,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'geq' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, {left} ||' >= '|| {right}) ;\n"
+                            q = "UPDATE {} SET cond = array_append(cond, {} ||' >= '|| {}) ;\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -266,7 +266,7 @@ class RelaAlgConsole(AppConsole):
                     elif 'leq' in c:
 
                         if right_is_attr or left_is_attr:
-                            q = f"UPDATE {t_result} SET cond = array_append(cond, {left} ||' <= '|| {right});\n"
+                            q = "UPDATE {} SET cond = array_append(cond, {} ||' <= '|| {});\n".format(t_result, left, right)
                         else:
                             q = ''
                         result += q
@@ -275,13 +275,13 @@ class RelaAlgConsole(AppConsole):
         result +="\n#"
         result +=  "Step3: Normalization\n"
 
-        q_contra = f"DELETE FROM {t_result} WHERE is_contradiction({t_result}.cond);\n"
+        q_contra = "DELETE FROM {} WHERE is_contradiction({}.cond);\n".format(t_result, t_result)
 
-        q_tauto = f"UPDATE {t_result} SET cond = '{{}}' WHERE is_tauto({t_result}.cond);\n"
+        q_tauto = "UPDATE {} SET cond = '{{}}' WHERE is_tauto({}.cond);\n".format(t_result, t_result)
 
         result += q_contra + q_tauto
 
-        q_rm = f"UPDATE {t_result} SET cond = remove_redundant(cond) where has_redundant(cond);\n"
+        q_rm = "UPDATE {} SET cond = remove_redundant(cond) where has_redundant(cond);\n".format(t_result)
         result += q_rm
 
         # q_projection = f"SELECT {select} from {t_result};\n"
@@ -313,7 +313,7 @@ class RelaAlgConsole(AppConsole):
         common_attr=[val for val in t1_attr if val in t2_attr and val != 'cond']
         union_attr = list(set(t1_attr).union(set(t2_attr)))
         result += "Step1: Create Data Content\n"
-        result += f"DROP TABLE IF EXISTS {t_result};\n"
+        result += "DROP TABLE IF EXISTS {};\n".format(t_result)
 
         slt_attr = ""
 
@@ -329,37 +329,37 @@ class RelaAlgConsole(AppConsole):
             slt_attr += f"{table1}.{a}, {table2}.{a} AS {table2}_{a},"
 
         if "cond" in t1_attr and "cond" in t2_attr:
-            slt_attr += f"array_cat({table1}.cond, {table2}.cond) AS cond,"
+            slt_attr += "array_cat({}.cond, {}.cond) AS cond,".format(table1, table2)
             #slt_attr += f" {table1}.cond AS cond, {table2}.cond AS {table2}_cond,"
         elif "cond" in t1_attr:
-            slt_attr += f" {table1}.cond AS cond,"
+            slt_attr += " {}.cond AS cond,".format(table1)
         elif "cond" in t2_attr:
-            slt_attr += f" {table2}.cond AS {table2}_cond,"
+            slt_attr += " {}.cond AS {}_cond,".format(table2, table2)
 
         slt_attr = slt_attr[:-1]
 
         join_cond = ""
 
         for a in common_attr:
-            join_cond += f" equal({table1}.{a}, {table2}.{a}) AND"
+            join_cond += " equal({}.{}, {}.{}) AND".format(table1, a, table2, a)
         join_cond = join_cond[:-3]
 
         
         if where != '':
             where_cond = ''
-            if f"{table1}." or f"{table2}." in where:
-                where.replace(f"{table1}.",'').replace(f"{table2}.",'')
+            if "{}.".format(table1) or "{}.".format(table2) in where:
+                where.replace("{}.".format(table1),'').replace("{}.".format(table2),'')
             where_1 = where[:]
             where_2 = where[:]
             for c in common_attr:
                 if c in where_1:
-                    where_1 = where_1.replace(c, f"{table1}.{c}")
-                    where_2 = where_2.replace(c, f"{table2}.{c}")
+                    where_1 = where_1.replace(c, "{}.{}".format(table1, c))
+                    where_2 = where_2.replace(c, "{}.{}".format(table2, c))
             #where_cond = f"({where_1}) and ({where_2})"   
-            where_cond = f"{where_1}"     
-            result += f"CREATE UNLOGGED TABLE {t_result} AS SELECT {slt_attr} FROM {table1} INNER JOIN {table2} on {join_cond} WHERE {where_cond}; \n"
+            where_cond = "{}".format(where_1)     
+            result += "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {} WHERE {}; \n".format(t_result, slt_attr, table1, table2, join_cond, where_cond)
         else:
-            result += f"CREATE UNLOGGED TABLE {t_result} AS SELECT {slt_attr} FROM {table1} INNER JOIN {table2} on {join_cond}; \n"
+            result += "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {}; \n".format(t_result, slt_attr, table1, table2, join_cond)
         
         #result += f"SELECT * FROM {t_result};\n"
         result +="\n#"
@@ -370,22 +370,22 @@ class RelaAlgConsole(AppConsole):
         result += "2.1: Insert Join Conditions\n"
         for attr in common_attr:
             #result += f"UPDATE {t_result} SET cond = array_append(cond, {attr} || ' == ' || {table2}_{attr})  WHERE  (is_var({t_result}.{attr}) OR is_var({t_result}.{table2}_{attr}) );"
-            result += f"UPDATE {t_result} SET cond = array_append(cond, {attr} || ' == ' || {table2}_{attr});\n"
+            result += "UPDATE {} SET cond = array_append(cond, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
         join_attr = ""
 
         result += "2.2: Projection and drop duplicated attributes\n"
         for attr in common_attr:
 
-            result += f"UPDATE {t_result} SET {attr} = {table2}_{attr} WHERE not is_var({attr});\n"
+            result += "UPDATE {} SET {} = {}_{} WHERE not is_var({});\n".format(t_result, attr, table2, attr, attr)
 
 
         q_dropcol = ''
         for attr in common_attr: 
-            q_dropcol += f"DROP COLUMN {table2}_{attr},"
+            q_dropcol += "DROP COLUMN {}_{},".format(table2, attr)
         
         q_dropcol = q_dropcol[:-1]
 
-        result += f"ALTER TABLE {t_result} {q_dropcol}; \n"
+        result += "ALTER TABLE {} {}; \n".format(t_result, q_dropcol)
         #ALTER TABLE t_result DROP COLUMN dest, DROP COLUMN path;
 
         return result
