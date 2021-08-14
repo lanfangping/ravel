@@ -70,7 +70,7 @@ class RelaAlgConsole(AppConsole):
             table1_name =  table1_info.split('(')[0].strip()
             table2_name =  table2_info.split('(')[0].strip()
             #t_result = f"{table1_name}_join_{table2_name}"
-            t_result = f"output"
+            t_result = "output"
             result = ""
             #result = f"Optional: DROP TABLE IF EXISTS {t_result}; \n\n"
 
