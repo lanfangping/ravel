@@ -302,7 +302,7 @@ class RelaAlgConsole(AppConsole):
         table1 =  table1_info.split('(')[0].strip()
         table2 =  table2_info.split('(')[0].strip()
 
-        t_result = f"output"
+        t_result = "output"
         #t_result = f"{table1}_join_{table2}"
         p2 = re.compile(r'[(](.*?)[)]', re.S)
         t1_attr =  re.findall(p2, table1_info)[0].strip().split(',')
@@ -319,14 +319,14 @@ class RelaAlgConsole(AppConsole):
 
         for a in t1_attr:
             if a not in common_attr and a != "cond":
-                slt_attr += f" {table1}.{a}, "
+                slt_attr += " {}.{}, ".format(table1, a)
         
         for a in t2_attr:
             if a not in common_attr and a != "cond":
-                slt_attr += f"{table2}.{a},"
+                slt_attr += "{}.{},".format(table2, a)
 
         for a in common_attr:
-            slt_attr += f"{table1}.{a}, {table2}.{a} AS {table2}_{a},"
+            slt_attr += "{}.{}, {}.{} AS {}_{},".format(table1, a, table2, a, table2, a)
 
         if "cond" in t1_attr and "cond" in t2_attr:
             slt_attr += "array_cat({}.cond, {}.cond) AS cond,".format(table1, table2)
