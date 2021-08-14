@@ -11,10 +11,7 @@ class RelaAlgConsole(AppConsole):
     def default(self, line):
         "Execute a PostgreSQL statement"
         try:
-        
-            print(line)
             self._get_sql(line)
-
             # self.db.cursor.execute(line)
         except psycopg2.ProgrammingError as e:
             print(e)
@@ -75,13 +72,12 @@ class RelaAlgConsole(AppConsole):
             table2_name =  table2_info.split('(')[0].strip()
             #t_result = f"{table1_name}_join_{table2_name}"
             t_result = "output"
-            result = ""
             #result = f"Optional: DROP TABLE IF EXISTS {t_result}; \n\n"
 
             if where == None:
-                result += self._cjoin(table1, table2,'')
+                self._cjoin(table1, table2,'')
             else:
-                result += self._cjoin(table1,table2,where)
+                self._cjoin(table1,table2,where)
                 #result += f"SELECT * FROM cjoin('{table1}', '{table2}');"
                 # result += f"CREATE TABLE {t_result}_temp AS SELECT * from {t_result} where {where};"
                 # result += f"DROP TABLE IF EXISTS {t_result};"
@@ -89,33 +85,31 @@ class RelaAlgConsole(AppConsole):
         if 'join' not in query:
             #t_result = f"{table_name}_o"
             t_result = "output"
-            result = ""
+            # result = ""
             
-            result += "Step1: Create data content\n"
+            # result += "Step1: Create data content\n"
             print("Step1: Create data content\n")
             
             sql = "DROP TABLE IF EXISTS {}; \n".format(t_result)
             print(sql)
-            result += sql
-
+            # result += sql
             # execute postgres SQL
             self.db.cursor.execute(sql)
     
             q1 = "CREATE UNLOGGED TABLE {} AS {} \n".format(t_result, query)
             print(q1)
-            result+=q1
-
+            # result+=q1
             # execute postgres SQL
             self.db.cursor.execute(q1)
 
             if where == None:
                 #result = query
-                return result
+                return 
             
             #result += f"SELECT * FROM {t_result};\n"
-            result +="\n#"
+            # result +="\n#"
 
-            result +=  "Step2: Update Conditions\n"
+            # result +=  "Step2: Update Conditions\n"
             print("\nStep2: Update Conditions\n")
 
         if where != None:
@@ -326,8 +320,8 @@ class RelaAlgConsole(AppConsole):
                             self.db.cursor.execute(q)
 
         #result += f"SELECT * FROM {t_result};\n"
-        result +="\n#"
-        result +=  "Step3: Normalization\n"
+        # result +="\n#"
+        # result +=  "Step3: Normalization\n"
         print("\nStep3: Normalization\n")
 
         q_contra = "DELETE FROM {} WHERE is_contradiction({}.condition);\n".format(t_result, t_result)
@@ -342,11 +336,11 @@ class RelaAlgConsole(AppConsole):
         # execute postgres SQL
         self.db.cursor.execute(q_tauto)
 
-        result += q_contra + q_tauto
+        # result += q_contra + q_tauto
         
 
         q_rm = "UPDATE {} SET condition = remove_redundant(condition) where has_redundant(condition);\n".format(t_result)
-        result += q_rm
+        # result += q_rm
 
         print(q_rm)
         # execute postgres SQL
@@ -355,12 +349,8 @@ class RelaAlgConsole(AppConsole):
         # q_projection = f"SELECT {select} from {t_result};\n"
         # result += q_projection
 
-
-
-        return result
-
     def _cjoin(self, table1_info,table2_info,where):
-        result = ''
+        # result = ''
         #t_result = 't_result'
 
         table1_info = table1_info.lower()
@@ -380,12 +370,12 @@ class RelaAlgConsole(AppConsole):
 
         common_attr=[val for val in t1_attr if val in t2_attr and val != 'condition']
         union_attr = list(set(t1_attr).union(set(t2_attr)))
-        result += "Step1: Create Data Content\n"
+        # result += "Step1: Create Data Content\n"
         print("Step1: Create Data Content\n")
 
         sql = "DROP TABLE IF EXISTS {};\n".format(t_result)
         print(sql)
-        result += sql
+        # result += sql
 
         # execute postgres SQL
         self.db.cursor.execute(sql)
@@ -433,7 +423,7 @@ class RelaAlgConsole(AppConsole):
             #where_cond = f"({where_1}) and ({where_2})"   
             where_cond = "{}".format(where_1)     
             sql = "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {} WHERE {}; \n".format(t_result, slt_attr, table1, table2, join_cond, where_cond)
-            result += sql
+            # result += sql
             
             print(sql)
             # execute postgres SQL
@@ -441,36 +431,36 @@ class RelaAlgConsole(AppConsole):
 
         else:
             sql = "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {}; \n".format(t_result, slt_attr, table1, table2, join_cond)
-            result += sql
+            # result += sql
 
             print(sql)
             # execute postgres SQL
             self.db.cursor.execute(sql)
         
         #result += f"SELECT * FROM {t_result};\n"
-        result +="\n#"
+        # result +="\n#"
 
-        result +=  "Step2: Update Conditions\n"
+        # result +=  "Step2: Update Conditions\n"
         print("\nStep2: Update Conditions\n")
 
         #result += f"UPDATE {t_result} SET cond =  array_cat(cond, {table2}_cond);\n"
-        result += "2.1: Insert Join Conditions\n"
+        # result += "2.1: Insert Join Conditions\n"
         print("\n2.1: Insert Join Conditions\n")
         for attr in common_attr:
             #result += f"UPDATE {t_result} SET cond = array_append(cond, {attr} || ' == ' || {table2}_{attr})  WHERE  (is_var({t_result}.{attr}) OR is_var({t_result}.{table2}_{attr}) );"
             sql = "UPDATE {} SET condition = array_append(condition, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
-            result += sql
+            # result += sql
 
             print(sql)
             # execute postgres SQL
             self.db.cursor.execute(sql)
         join_attr = ""
 
-        result += "2.2: Projection and drop duplicated attributes\n"
+        # result += "2.2: Projection and drop duplicated attributes\n"
         print("2.2: Projection and drop duplicated attributes\n")
         for attr in common_attr:
             sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});\n".format(t_result, attr, table2, attr, attr)
-            result += sql
+            # result += sql
             
             print(sql)
             # execute postgres SQL
@@ -483,15 +473,13 @@ class RelaAlgConsole(AppConsole):
         q_dropcol = q_dropcol[:-1]
          
         sql = "ALTER TABLE {} {}; \n".format(t_result, q_dropcol)
-        result += sql
+        # result += sql
 
         print(sql)
         # execute postgres SQL
         self.db.cursor.execute(sql)
 
         #ALTER TABLE t_result DROP COLUMN dest, DROP COLUMN path;
-
-        return result
 
 shortcut = "ra"
 description = "execute a relational algebra"
