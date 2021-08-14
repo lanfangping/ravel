@@ -160,17 +160,17 @@ class RelaAlgConsole(AppConsole):
                             right = right # cons
 
                         if 'not_equal' in c:
-                            or_exp += f"{left} || ' != ' || { right } || ',' ||"
+                            or_exp += "{} || ' != ' || {} || ',' ||".format(left, right)
                         elif 'equal' in c:
-                            or_exp += f"{left} || ' == ' || { right } || ',' ||"
+                            or_exp += "{} || ' == ' || {  } || ',' ||".format(left, right)
                         elif 'greater' in c:
-                            or_exp += f"{left} || ' > ' || { right } || ',' ||"
+                            or_exp += "{} || ' > ' || {  } || ',' ||".format(left, right)
                         elif 'less' in c:
-                            or_exp += f"{left} || ' < ' || { right } || ',' ||"
+                            or_exp += "{} || ' < ' || {  } || ',' ||".format(left, right)
                         elif 'geq' in c:
-                            or_exp += f"{left} || ' >= ' || { right } || ',' ||"
+                            or_exp += "{} || ' >= ' || {  } || ',' ||".format(left, right)
                         elif 'leq' in c:
-                            or_exp += f"{left} || ' <= ' || { right } || ',' ||"
+                            or_exp += "{} || ' <= ' || { } || ',' ||".format(left, right)
 
                         left = left.replace("'","")
                         right = right.replace("'","")
