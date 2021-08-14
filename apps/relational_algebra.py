@@ -13,7 +13,7 @@ class RelaAlgConsole(AppConsole):
         try:
         
             print(line)
-            print(self._get_sql(line))
+            self._get_sql(line)
 
             # self.db.cursor.execute(line)
         except psycopg2.ProgrammingError as e:
@@ -88,10 +88,22 @@ class RelaAlgConsole(AppConsole):
             result = ""
             
             result += "Step1: Create data content\n"
-            result += "DROP TABLE IF EXISTS {}; \n".format(t_result)
+            print("Step1: Create data content\n")
+            
+            sql = "DROP TABLE IF EXISTS {}; \n".format(t_result)
+            print(sql)
+            result += sql
+
+            # execute postgres SQL
+            self.db.cursor.execute(sql)
     
             q1 = "CREATE UNLOGGED TABLE {} AS {} \n".format(t_result, query)
+            print(q1)
             result+=q1
+
+            # execute postgres SQL
+            self.db.cursor.execute(q1)
+
             if where == None:
                 #result = query
                 return result
@@ -100,6 +112,7 @@ class RelaAlgConsole(AppConsole):
             result +="\n#"
 
             result +=  "Step2: Update Conditions\n"
+            print("\nStep2: Update Conditions\n")
 
         if where != None:
 
@@ -189,6 +202,13 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         if q not in result:
                             result += q
+
+                            if q != '':
+                                print(q)
+                                # execute postgres SQL
+                                self.db.cursor.execute(q)
+
+                            
                 
                 elif not has_or:
 
@@ -230,6 +250,11 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         result += q
 
+                        if q != '':
+                            print(q)
+                            # execute postgres SQL
+                            self.db.cursor.execute(q)
+
                     elif 'equal' in c:
 
                         if right_is_attr or left_is_attr:
@@ -238,6 +263,11 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         result += q
 
+                        if q != '':
+                            print(q)
+                            # execute postgres SQL
+                            self.db.cursor.execute(q)
+
                     elif 'greater' in c:
 
                         if right_is_attr or left_is_attr:
@@ -245,6 +275,11 @@ class RelaAlgConsole(AppConsole):
                         else:
                             q = ''
                         result += q
+
+                        if q != '':
+                            print(q)
+                            # execute postgres SQL
+                            self.db.cursor.execute(q)
 
                     elif 'less' in c:
 
@@ -255,6 +290,11 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         result += q
 
+                        if q != '':
+                            print(q)
+                            # execute postgres SQL
+                            self.db.cursor.execute(q)
+
                     elif 'geq' in c:
 
                         if right_is_attr or left_is_attr:
@@ -262,6 +302,11 @@ class RelaAlgConsole(AppConsole):
                         else:
                             q = ''
                         result += q
+
+                        if q != '':
+                            print(q)
+                            # execute postgres SQL
+                            self.db.cursor.execute(q)
 
                     elif 'leq' in c:
 
@@ -271,18 +316,37 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         result += q
 
+                        if q != '':
+                            print(q)
+                            # execute postgres SQL
+                            self.db.cursor.execute(q)
+
         #result += f"SELECT * FROM {t_result};\n"
         result +="\n#"
         result +=  "Step3: Normalization\n"
+        print("\nStep3: Normalization\n")
 
         q_contra = "DELETE FROM {} WHERE is_contradiction({}.cond);\n".format(t_result, t_result)
 
+        print(q_contra)
+        # execute postgres SQL
+        self.db.cursor.execute(q_contra)
+
         q_tauto = "UPDATE {} SET cond = '{{}}' WHERE is_tauto({}.cond);\n".format(t_result, t_result)
 
+        print(q_tauto)
+        # execute postgres SQL
+        self.db.cursor.execute(q_tauto)
+
         result += q_contra + q_tauto
+        
 
         q_rm = "UPDATE {} SET cond = remove_redundant(cond) where has_redundant(cond);\n".format(t_result)
         result += q_rm
+
+        print(q_rm)
+        # execute postgres SQL
+        self.db.cursor.execute(q_rm)
 
         # q_projection = f"SELECT {select} from {t_result};\n"
         # result += q_projection
@@ -313,7 +377,14 @@ class RelaAlgConsole(AppConsole):
         common_attr=[val for val in t1_attr if val in t2_attr and val != 'cond']
         union_attr = list(set(t1_attr).union(set(t2_attr)))
         result += "Step1: Create Data Content\n"
-        result += "DROP TABLE IF EXISTS {};\n".format(t_result)
+        print("Step1: Create Data Content\n")
+
+        sql = "DROP TABLE IF EXISTS {};\n".format(t_result)
+        print(sql)
+        result += sql
+
+        # execute postgres SQL
+        self.db.cursor.execute(sql)
 
         slt_attr = ""
 
@@ -357,35 +428,63 @@ class RelaAlgConsole(AppConsole):
                     where_2 = where_2.replace(c, "{}.{}".format(table2, c))
             #where_cond = f"({where_1}) and ({where_2})"   
             where_cond = "{}".format(where_1)     
-            result += "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {} WHERE {}; \n".format(t_result, slt_attr, table1, table2, join_cond, where_cond)
+            sql = "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {} WHERE {}; \n".format(t_result, slt_attr, table1, table2, join_cond, where_cond)
+            result += sql
+            
+            print(sql)
+            # execute postgres SQL
+            self.db.cursor.execute(sql)
+
         else:
-            result += "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {}; \n".format(t_result, slt_attr, table1, table2, join_cond)
+            sql = "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {}; \n".format(t_result, slt_attr, table1, table2, join_cond)
+            result += sql
+
+            print(sql)
+            # execute postgres SQL
+            self.db.cursor.execute(sql)
         
         #result += f"SELECT * FROM {t_result};\n"
         result +="\n#"
 
         result +=  "Step2: Update Conditions\n"
+        print("\nStep2: Update Conditions\n")
 
         #result += f"UPDATE {t_result} SET cond =  array_cat(cond, {table2}_cond);\n"
         result += "2.1: Insert Join Conditions\n"
+        print("\n2.1: Insert Join Conditions\n")
         for attr in common_attr:
             #result += f"UPDATE {t_result} SET cond = array_append(cond, {attr} || ' == ' || {table2}_{attr})  WHERE  (is_var({t_result}.{attr}) OR is_var({t_result}.{table2}_{attr}) );"
-            result += "UPDATE {} SET cond = array_append(cond, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
+            sql = "UPDATE {} SET cond = array_append(cond, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
+            result += sql
+
+            print(sql)
+            # execute postgres SQL
+            self.db.cursor.execute(sql)
         join_attr = ""
 
         result += "2.2: Projection and drop duplicated attributes\n"
+        print("2.2: Projection and drop duplicated attributes\n")
         for attr in common_attr:
-
-            result += "UPDATE {} SET {} = {}_{} WHERE not is_var({});\n".format(t_result, attr, table2, attr, attr)
-
+            sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});\n".format(t_result, attr, table2, attr, attr)
+            result += sql
+            
+            print(sql)
+            # execute postgres SQL
+            self.db.cursor.execute(sql)
 
         q_dropcol = ''
         for attr in common_attr: 
             q_dropcol += "DROP COLUMN {}_{},".format(table2, attr)
         
         q_dropcol = q_dropcol[:-1]
+         
+        sql = "ALTER TABLE {} {}; \n".format(t_result, q_dropcol)
+        result += sql
 
-        result += "ALTER TABLE {} {}; \n".format(t_result, q_dropcol)
+        print(sql)
+        # execute postgres SQL
+        self.db.cursor.execute(sql)
+
         #ALTER TABLE t_result DROP COLUMN dest, DROP COLUMN path;
 
         return result
