@@ -44,3 +44,6 @@ CREATE OR REPLACE RULE bgp_repair AS
        ON DELETE TO bgp_violation
        DO INSTEAD
           DELETE FROM routes where fid = OLD.fid;
+
+
+/* join */
