@@ -84,7 +84,7 @@ class RelaAlgConsole(AppConsole):
                 # result += f"ALTER TABLE {t_result}_temp RENAME TO {t_result};"
         if 'join' not in query:
             #t_result = f"{table_name}_o"
-            t_result = f"output"
+            t_result = "output"
             result = ""
             
             result += "Step1: Create data content\n"
