@@ -16,5 +16,5 @@ CREATE OR REPLACE VIEW relational_algebra_violation AS (
 
 /* Repair */
 CREATE OR REPLACE RULE relational_algebra_repair AS
-       ON DELETE TO relational_algebra_violationAS
+       ON DELETE TO relational_algebra_violation
        DO NOTHING;
