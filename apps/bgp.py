@@ -41,7 +41,7 @@ class BGPConsole(AppConsole):
         try:
             print("Step1: Create Data Content")
             print("DROP TABLE IF EXISTS output;")
-            self.db.cursor.execute("DROP TABLE IF EXISTS {}};".format(name))
+            self.db.cursor.execute("DROP TABLE IF EXISTS {};".format(name))
 
             sql = "CREATE UNLOGGED TABLE {} \
                     AS SELECT {}.dest, {}.dest AS {}_dest, \
