@@ -28,7 +28,15 @@ class BGPConsole(AppConsole):
         self.db.cursor.executemany("INSERT INTO routes(dest, path, min_len) VALUES (%s, %s, %s);", rtable)
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
     
-    def do_best_routes(self, policy, routes):
+    def do_best_routes(self, line):
+        args = line.split()
+        if len(args) != 2:
+            print("Invalid syntax") 
+            return
+        
+        policy = args[0]
+        routes = args[1]
+
         name = "{}_join_{}".format(policy, routes)
         try:
             print("Step1: Create Data Content")
