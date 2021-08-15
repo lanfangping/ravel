@@ -1,4 +1,6 @@
 from ravel.app import AppConsole
+import psycopg2
+import tabulate
 
 rib_file = './topo/RouteView/rib.txt'
 upd_file = './topo/RouteView/update.txt'
@@ -7,6 +9,12 @@ class BGPConsole(AppConsole):
     def do_echo(self, line):
         print("test", line)
     
+    '''
+    Load realistic data from RouteView RIB and UPDATE
+    1. bgp_policy and candidate routes are generated from RIB
+    2. routes_delta are generated from UPDATE
+    default file: 2021.06.10 00:00
+    '''
     def do_loaddata(self,line):
         # args = line.split()
         # if len(args) != 2:
@@ -15,20 +23,130 @@ class BGPConsole(AppConsole):
         
         # rib_file = args[0]
         # upd_file = args[1]
-        ptable, rtable, update_table = self.gen_ptable()
+        ptable, rtable, update_table = self._gen_ptable()
         self.db.cursor.executemany("INSERT INTO bgp_policy VALUES (%s, %s, %s, %s);", ptable)
-        self.db.cursor.executemany("INSERT INTO routes(dest, path) VALUES (%s, %s);", rtable)
+        self.db.cursor.executemany("INSERT INTO routes(dest, path, min_len) VALUES (%s, %s);", rtable)
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
+    
+    def do_best_routes(self, policy, routes):
+        name = "{}_join_{}".format(policy, routes)
+        try:
+            print("Step1: Create Data Content")
+            print("DROP TABLE IF EXISTS output;")
+            self.db.cursor.execute("DROP TABLE IF EXISTS {}};".format(name))
 
+            sql = "CREATE UNLOGGED TABLE {} \
+                    AS SELECT {}.dest, {}.dest AS {}_dest, \
+                    {}.path, {}.path AS {}_path, \
+                    {}.min_len, {}.min_len AS {}_min_len, \
+                    {}.condition \
+                    FROM {}, {} where equal({}.dest, {}.dest) \
+                    AND equal({}.path, {}.path) \
+                    AND {}.min_len = {}.min_len ; ".format(name, policy, routes, routes, policy, routes, routes, policy, routes, routes, policy, policy, routes, policy, routes, policy, routes, policy, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            print("\nStep2: Update Conditions\n \
+                    2.1: Insert Join Conditions")
+
+            sql = "UPDATE {} SET condition = array_append(condition, dest || ' == ' || {}_dest);".format(name, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "UPDATE {} SET condition = array_append(condition, path || ' == ' || {}_path);".format(name, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "UPDATE {} SET condition = array_append(condition, min_len || ' == ' || {}_min_len);".format(name, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "update {} set condition = array_append(condition, 'l(' || path || ') == ' || l({}_path));".format(name, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            print("2.2: Projection and drop duplicated attributes")
+
+            sql = "UPDATE {} SET dest = {}_dest WHERE not is_var(dest);".format(name, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "UPDATE {} SET path = {}_path WHERE not is_var(path);".format(name, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "UPDATE {} SET min_len = {}_min_len WHERE min_len > {}_min_len;".format(name, routes, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "ALTER TABLE {} DROP COLUMN {}_dest,DROP COLUMN {}_path,DROP COLUMN {}_min_len;".format(name, routes, routes)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            print("\nStep3: Normalization\n")
+            sql = "DELETE FROM {} WHERE is_contradiction(condition);".format(name)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "UPDATE {} SET condition = '{}' WHERE is_tauto(condition);".format(name)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "UPDATE {} SET condition = remove_redundant(condition) where has_redundant(condition);".format(name)
+            print(sql)
+            self.db.cursor.execute(sql) 
+
+            print("\nStep 4: extending values")
+            sql = "DROP TABLE IF EXISTS current_best_routes;"
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "create table current_best_routes as \
+                    select dest, set_path_val(path, condition) as path, \
+                    len_path\
+                    from {};".format(name)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+        except psycopg2.ProgrammingError as e:
+            print(e)
+            return
+
+        try:
+            print('************************************************************************')
+            print("")
+            self.db.cursor.execute("select * from current_best_routes;")
+            data = self.db.cursor.fetchall()
+            if data is not None:
+                names = [row[0] for row in self.db.cursor.description]
+                print(tabulate.tabulate(data, headers=names))
+            print('************************************************************************')
+        except psycopg2.ProgrammingError:
+            # no results, eg from an insert/delete
+            pass
+        except TypeError as e:
+            print(e)
+            
         
-
-    def addtwodimdict(self, thedict, key_a, key_b, val): 
+    '''
+    Tool function for gen_ptable()
+    '''
+    def _addtwodimdict(self, thedict, key_a, key_b, val): 
         if key_a in thedict:
             thedict[key_a].update({key_b: val})
         else:
             thedict.update({key_a:{key_b: val}})  
 
-    def gen_ptable(self, filename = rib_file, update_file = upd_file, size1 = 333,size2 = 333,size3 = 334,symbol1 = 'x', symbol2 = 'y', symbol3 = 'z'):
+    '''
+    Generate policy, condidates routes and routes_delta
+    1. policy: a. shortest path policy
+               b. static routes policy
+               c. filter policy
+    2. candidate routes
+    3. delta routes: a. annoucement
+                     b. withdrawal
+    '''
+    def _gen_ptable(self, filename = rib_file, update_file = upd_file, size1 = 333,size2 = 333,size3 = 334,symbol1 = 'x', symbol2 = 'y', symbol3 = 'z'):
         # policy, routing, rib = gen_all(rib_file, 'x', 'W', size1)
         # for i in range(0,5):
         #     print(policy[i])
@@ -79,15 +197,15 @@ class BGPConsole(AppConsole):
             if ip in ips1: 
                 if s_path < spath_dict[ip]:
                     spath_dict[ip] = s_path
-                    self.addtwodimdict(already_dict, ip, s_path, False)
+                    self._addtwodimdict(already_dict, ip, s_path, False)
                 if[ip, path] not in temp_table:
                     temp_table.append([ip, path])
-                    self.addtwodimdict(already_dict, ip, s_path, False)
+                    self._addtwodimdict(already_dict, ip, s_path, False)
                 continue
             elif ip not in ips1 and count1 < size1:
                 ips1.add(ip)
                 spath_dict[ip] = s_path
-                self.addtwodimdict(already_dict, ip, s_path, False)
+                self._addtwodimdict(already_dict, ip, s_path, False)
                 temp_table.append([ip, path])
                 count1 +=1
                 continue
