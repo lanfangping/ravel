@@ -646,3 +646,29 @@ AS $$
 
     return int(var)
 $$ LANGUAGE plpython3u;
+
+CREATE OR REPLACE FUNCTION set_path_val(path_name TEXT, conds TEXT [])
+    RETURNS TEXT
+AS $$
+    if path_name == '_':
+        return '_'
+        
+    for cond in conds:
+        cond = cond.strip()
+
+        first_space = cond.find(' ')
+        second_space = cond.find(' ', first_space + 1)
+
+        var1 = cond[:first_space].strip()
+        op = cond[first_space + 1: second_space].strip()
+        var2 = cond[second_space + 1:].strip()
+        
+        if path_name == var1 and op == '==':
+            return var2
+        elif path_name == var2 and op == '==':
+            return var1
+        else:
+            continue
+    
+    return ''
+$$ LANGUAGE plpython3u;
