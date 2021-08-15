@@ -87,7 +87,7 @@ class BGPConsole(AppConsole):
             print(sql)
             self.db.cursor.execute(sql)
 
-            sql = "ALTER TABLE {} DROP COLUMN {}_dest,DROP COLUMN {}_path,DROP COLUMN {}_min_len;".format(name, routes, routes)
+            sql = "ALTER TABLE {} DROP COLUMN {}_dest,DROP COLUMN {}_path,DROP COLUMN {}_min_len;".format(name, routes, routes, routes)
             print(sql)
             self.db.cursor.execute(sql)
 
