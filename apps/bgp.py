@@ -254,7 +254,7 @@ class BGPConsole(AppConsole):
                 var_count1 += 2
                 ips1_temp.add(t[0])
             # p1_rtable.append([t[0],t[1], spath_dict[t[0]], [] ])
-            p1_rtable.append([t[0],t[1] ])
+            p1_rtable.append([t[0],t[1], spath_dict[t[0]]])
         
         # p3
         # num = var_count3 + 1
