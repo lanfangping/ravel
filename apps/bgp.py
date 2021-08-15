@@ -221,11 +221,11 @@ class BGPConsole(AppConsole):
                 count2 +=1
 
                 # p2_rtable.append([ip,path, -1, []])
-                p2_rtable.append([ip,path])
+                p2_rtable.append([ip,path, -1])
                 continue         
             elif ip in ips2:
                 # p2_rtable.append([ip,path, -1,[]])
-                p2_rtable.append([ip,path])
+                p2_rtable.append([ip,path, -1])
                 continue
 
             # p3: filter
@@ -238,7 +238,7 @@ class BGPConsole(AppConsole):
 
                 #p3_cond.append(symbol + ' != ' + ip)
                 p3_ctable.append([ip,s2, -1, [str(s2) + ' == nopath'] ])
-                p3_rtable.append([ip,path ])
+                p3_rtable.append([ip,path, -1])
                 count3 += 1
                 continue
 
