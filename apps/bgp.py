@@ -39,6 +39,7 @@ class BGPConsole(AppConsole):
 
         name = "{}_join_{}".format(policy, routes)
         try:
+            print("select * from bgp_policy(dest, path, min_len, condition) join routes(dest, path, min_len)\n")
             print("Step1: Create Data Content")
             print("DROP TABLE IF EXISTS output;")
             self.db.cursor.execute("DROP TABLE IF EXISTS {};".format(name))
@@ -109,10 +110,7 @@ class BGPConsole(AppConsole):
             print(sql)
             self.db.cursor.execute(sql)
 
-            sql = "create table current_best_routes as \
-                    select dest, set_path_val(path, condition) as path, \
-                    min_len\
-                    from {};".format(name)
+            sql = "create table current_best_routes as select dest, set_path_val(path, condition) as path, min_len from {};".format(name)
             print(sql)
             self.db.cursor.execute(sql)
 
@@ -122,7 +120,7 @@ class BGPConsole(AppConsole):
 
         try:
             print('************************************************************************')
-            print("")
+            print("current best routes")
             self.db.cursor.execute("select * from current_best_routes;")
             data = self.db.cursor.fetchall()
             if data is not None:
