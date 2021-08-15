@@ -111,7 +111,7 @@ class BGPConsole(AppConsole):
 
             sql = "create table current_best_routes as \
                     select dest, set_path_val(path, condition) as path, \
-                    len_path\
+                    min_len\
                     from {};".format(name)
             print(sql)
             self.db.cursor.execute(sql)
