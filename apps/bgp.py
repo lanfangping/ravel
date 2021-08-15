@@ -96,7 +96,7 @@ class BGPConsole(AppConsole):
             print(sql)
             self.db.cursor.execute(sql)
 
-            sql = "UPDATE {} SET condition = '{}' WHERE is_tauto(condition);".format(name)
+            sql = "UPDATE {} SET condition = '\{\}' WHERE is_tauto(condition);".format(name)
             print(sql)
             self.db.cursor.execute(sql)
 
