@@ -43,6 +43,19 @@ INSERT INTO Policy2 (dest, path, flag, condition) VALUES
 ('1.2.3.4','[AC]', 'v', '{"v == 1"}'),
 ('5.6.7.8','[AC]', 'v', '{"v != 1"}');
 
+/* Instance 1 */
+DROP TABLE IF EXISTS instance1 CASCADE;
+create table instance1 ( DEST TEXT, PATH TEXT,CONDITION TEXT []);
+insert into instance1 ( DEST,PATH, CONDITION) values 
+('1.2.3.4','[ABC]','{"[ABC] == [ABC]"}'),
+('5.6.7.8','[AC]','{"5.6.7.8 != 1.2.3.5", "5.6.7.8 != 1.2.3.4"}');
+
+/* Instance 2: contradictary*/
+DROP TABLE IF EXISTS instance2 CASCADE;
+create table instance2 ( DEST TEXT, PATH TEXT,CONDITION TEXT []);
+insert into instance2 ( DEST,PATH, CONDITION) values 
+('1.2.3.4','[AC]','{"[AC] == [ABC]"}'),
+('1.2.3.5','[ADC]','{"1.2.3.5 != 1.2.3.5", "1.2.3.5 != 1.2.3.4"}');
 
 /* Violation: */
 CREATE OR REPLACE VIEW relational_algebra_violation AS (
