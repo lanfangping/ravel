@@ -15,7 +15,8 @@ class BGPConsole(AppConsole):
     2. routes_delta are generated from UPDATE
     default file: 2021.06.10 00:00
     '''
-    def do_loaddata(self,line):
+    def do_load(self,line):
+        "Load data which inferred from BGP RouteView RIB and UPDATE file"
         # args = line.split()
         # if len(args) != 2:
         #     print("Invalid syntax") 
@@ -29,6 +30,7 @@ class BGPConsole(AppConsole):
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
     
     def do_loaddemo(self, line):
+        "Load sample data which inferred from BGP RouteView RIB and UPDATE file"
         ptable = [
             ['1.6.68.0/22', 'x579', 2, '{"l(x579) <= 2"}'],
             ['1.6.4.0/22', 'x531', 2, '{"l(x531) <= 2"}'],
@@ -51,6 +53,7 @@ class BGPConsole(AppConsole):
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
 
     def do_join(self, line):
+        "Do join operation. Format: join <table_1> <table_2>"
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 

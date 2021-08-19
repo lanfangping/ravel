@@ -39,6 +39,7 @@ class RelaAlgConsole(AppConsole):
             print(e)
 
     def do_data(self, line):
+        "Create data content"
         data, _, _ = self._get_sql(line)
 
         print("Step1: Create data content\n")
@@ -47,6 +48,8 @@ class RelaAlgConsole(AppConsole):
             self.db.cursor.execute(d)
 
     def do_condition(self, line):
+        "Update Conditions"
+
         _, condition, _ = self._get_sql(line)
 
         print("\nStep2: Update Conditions\n")
@@ -56,6 +59,7 @@ class RelaAlgConsole(AppConsole):
                 self.db.cursor.execute(c)
 
     def do_z3(self, line):
+        "Normalization"
         _, _, z3 = self._get_sql(line)
         print("\nStep3: Normalization\n")
         for z in z3:
