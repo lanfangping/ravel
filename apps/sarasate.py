@@ -39,7 +39,7 @@ class RelaAlgConsole(AppConsole):
             print(e)
 
     def do_data(self, line):
-        "Create data content"
+        "Create data content."
         data, _, _ = self._get_sql(line)
 
         print("Step1: Create data content\n")
