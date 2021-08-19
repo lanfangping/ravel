@@ -118,7 +118,10 @@ class BGPConsole(AppConsole):
             print("2.2: Projection and drop duplicated attributes")
 
             for c in common_attr:
-                sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});".format(name, c, routes, c, c)
+                if 'len' in c:
+                    sql = "UPDATE {} SET {} = {}_{} WHERE {} > {}_{};".format(name, c, routes, c, c, routes, c)
+                else:
+                    sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});".format(name, c, routes, c, c)
                 print(sql)
                 self.db.cursor.execute(sql)
 
