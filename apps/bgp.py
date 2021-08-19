@@ -65,9 +65,9 @@ class BGPConsole(AppConsole):
         self.db.cursor.execute("select * from {};".format(routes))
         routes_cols = [row[0] for row in self.db.cursor.description]
 
-        common_attr= set([val for val in policy_cols if val in routes_cols and val != 'condition'])
+        common_attr= set(policy_cols).intersection(set(routes_cols)) - set('condition')
         union_attr = set(policy_cols).union(set(routes_cols))
-        diff_attr = union_attr - common_attr
+        diff_attr = union_attr - common_attr - set('condition')
 
         sql_attr = ""
         sql_equal = ""
