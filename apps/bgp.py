@@ -68,6 +68,7 @@ class BGPConsole(AppConsole):
         common_attr= set(policy_cols).intersection(set(routes_cols)) - set('condition')
         union_attr = set(policy_cols).union(set(routes_cols))
         diff_attr = union_attr - common_attr
+        diff_attr = diff_attr - set('condition')
 
         print("common: ", common_attr)
         print("diff: ", diff_attr)
