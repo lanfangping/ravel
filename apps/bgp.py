@@ -54,7 +54,7 @@ class BGPConsole(AppConsole):
 
     def do_join(self, line):
         """Do join operation. 
-            Format: join <table_1> <table_2>"""
+        Format: join <table_1> <table_2>"""
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -179,7 +179,7 @@ class BGPConsole(AppConsole):
 
     def do_extend_values(self, line):
         """Extend values in condtion column to variables and rename the table name
-           Usage: extend_values [table] [new_name] ..."""
+        Usage: extend_values [table] [new_name] ..."""
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -221,7 +221,7 @@ class BGPConsole(AppConsole):
     '''
     def do_update_policy(self, line):
         """Update current bgp policy that affecting by bgp announcement
-            Usage: update_policy [policy] [delta]"""
+        Usage: update_policy [policy] [delta]"""
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -253,7 +253,7 @@ class BGPConsole(AppConsole):
     '''
     def do_union(self, line):
         """Union operation. 
-            Usage: union [table1] [table2]"""
+        Usage: union [table1] [table2]"""
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -298,8 +298,8 @@ class BGPConsole(AppConsole):
     
     def do_rename(self, line):
         """Rename table name or column name. 
-            Usage: rename [table] [new_table]
-                   rename [table] [col] [new_col]"""
+        Usage: rename [table] [new_table]
+            rename [table] [col] [new_col]"""
         args = line.split()
         type = args[0]
         if type == 'table' and len(args) != 3:
