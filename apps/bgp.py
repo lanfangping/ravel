@@ -77,7 +77,7 @@ class BGPConsole(AppConsole):
         for c in common_attr:
             sql_attr += "{}.{}, {}.{} AS {}_{},".format(policy, c, routes, c, routes, c)
 
-            if 'len' in common_attr:
+            if 'len' in c:
                 sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
             else:
                 sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
