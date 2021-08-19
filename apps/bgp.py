@@ -65,10 +65,9 @@ class BGPConsole(AppConsole):
         self.db.cursor.execute("select * from {};".format(routes))
         routes_cols = [row[0] for row in self.db.cursor.description]
 
-        common_attr= set(policy_cols).intersection(set(routes_cols)) - set('condition')
-        union_attr = set(policy_cols).union(set(routes_cols))
+        common_attr= set(policy_cols).intersection(set(routes_cols)) - set(['condition'])
+        union_attr = set(policy_cols).union(set(routes_cols)) - set(['condition'])
         diff_attr = union_attr - common_attr
-        diff_attr = diff_attr - set('condition')
 
         print("common: ", common_attr)
         print("diff: ", diff_attr)
@@ -78,10 +77,10 @@ class BGPConsole(AppConsole):
         for c in common_attr:
             sql_attr += "{}.{}, {}.{} AS {}_{},".format(policy, c, routes, c, routes, c)
 
-            if isinstance(c, str):
-                sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
-            elif isinstance(c, int):
+            if 'len' in common_attr:
                 sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
+            else:
+                sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
 
         sql_equal = sql_equal[: -4]
 
