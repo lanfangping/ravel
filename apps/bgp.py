@@ -74,9 +74,9 @@ class BGPConsole(AppConsole):
         for c in common_attr:
             sql_attr += "{}.{}, {}.{} AS {}_{},".format(policy, c, routes, c, routes, c)
 
-            if type(c) == 'str':
+            if isinstance(c, str):
                 sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
-            elif type(c) == 'int':
+            elif isinstance(c, int):
                 sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
 
         sql_equal = sql_equal[: -3]
@@ -95,7 +95,7 @@ class BGPConsole(AppConsole):
 
             sql = "CREATE UNLOGGED TABLE {} AS SELECT ".format(name) + \
                     sql_attr + \
-                    "FROM {}, {} where".format(policy, routes) + \
+                    " FROM {}, {} where ".format(policy, routes) + \
                     sql_equal + "; "
             print(sql)
             self.db.cursor.execute(sql)
