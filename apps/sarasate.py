@@ -13,7 +13,10 @@ class RelaAlgConsole(AppConsole):
         try:
         
             print(line)
-            self._get_sql(line)
+            data, condition, z3 = self._get_sql(line)
+            print(data)
+            print(condition)
+            print(z3)
 
             # self.db.cursor.execute(line)
         except psycopg2.ProgrammingError as e:
