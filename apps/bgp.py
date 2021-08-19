@@ -59,6 +59,33 @@ class BGPConsole(AppConsole):
         policy = args[0]
         routes = args[1]
 
+        self.db.cursor.execute("select * from {};".format(policy))
+        policy_cols = [row[0] for row in self.db.cursor.description]
+
+        self.db.cursor.execute("select * from {};".format(routes))
+        routes_cols = [row[0] for row in self.db.cursor.description]
+
+        common_attr= set([val for val in policy_cols if val in routes_cols and val != 'condition'])
+        union_attr = set(policy_cols).union(set(routes_cols))
+        diff_attr = union_attr - common_attr
+
+        sql_attr = ""
+        sql_equal = ""
+        for c in common_attr:
+            sql_attr += "{}.{}, {}.{} AS {}_{},".format(policy, c, routes, c, routes, c)
+
+            if type(c) == 'str':
+                sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
+            elif type(c) == 'int':
+                sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
+
+        sql_equal = sql_equal[: -3]
+
+        for d in diff_attr:
+            sql_attr += "{},".format(d)
+
+        sql_attr += "{}.condition".format(policy)
+
         name = "{}_join_{}".format(policy, routes)
         try:
             print("select * from {}(dest, path, min_len, condition) join {}(dest, path, min_len)\n".format(policy, routes))
@@ -66,31 +93,20 @@ class BGPConsole(AppConsole):
             print("DROP TABLE IF EXISTS {};".format(name))
             self.db.cursor.execute("DROP TABLE IF EXISTS {};".format(name))
 
-            sql = "CREATE UNLOGGED TABLE {} \
-                    AS SELECT {}.dest, {}.dest AS {}_dest, \
-                    {}.path, {}.path AS {}_path, \
-                    {}.min_len, {}.min_len AS {}_min_len, \
-                    {}.condition \
-                    FROM {}, {} where equal({}.dest, {}.dest) \
-                    AND equal({}.path, {}.path) \
-                    AND {}.min_len = {}.min_len ; ".format(name, policy, routes, routes, policy, routes, routes, policy, routes, routes, policy, policy, routes, policy, routes, policy, routes, policy, routes)
+            sql = "CREATE UNLOGGED TABLE {} AS SELECT ".format(name) + \
+                    sql_attr + \
+                    "FROM {}, {} where".format(policy, routes) + \
+                    sql_equal + "; "
             print(sql)
             self.db.cursor.execute(sql)
 
             print("\nStep2: Update Conditions\n \
                     2.1: Insert Join Conditions")
 
-            sql = "UPDATE {} SET condition = array_append(condition, dest || ' == ' || {}_dest);".format(name, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
-
-            sql = "UPDATE {} SET condition = array_append(condition, path || ' == ' || {}_path);".format(name, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
-
-            sql = "UPDATE {} SET condition = array_append(condition, min_len || ' == ' || {}_min_len);".format(name, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
+            for c in common_attr:
+                sql = "UPDATE {} SET condition = array_append(condition, {} || ' == ' || {}_{});".format(name, c, routes, c)
+                print(sql)
+                self.db.cursor.execute(sql)
 
             sql = "update {} set condition = array_append(condition, 'l(' || path || ') == ' || l({}_path));".format(name, routes)
             print(sql)
@@ -98,19 +114,14 @@ class BGPConsole(AppConsole):
 
             print("2.2: Projection and drop duplicated attributes")
 
-            sql = "UPDATE {} SET dest = {}_dest WHERE not is_var(dest);".format(name, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
+            for c in common_attr:
+                sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});".format(name, c, routes, c, c)
+                print(sql)
+                self.db.cursor.execute(sql)
 
-            sql = "UPDATE {} SET path = {}_path WHERE not is_var(path);".format(name, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
-
-            sql = "UPDATE {} SET min_len = {}_min_len WHERE min_len > {}_min_len;".format(name, routes, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
-
-            sql = "ALTER TABLE {} DROP COLUMN {}_dest,DROP COLUMN {}_path,DROP COLUMN {}_min_len;".format(name, routes, routes, routes)
+            drop = ["DROP COLUMN " + routes + "_" + c + "," for c in common_attr]
+            drop = drop[:-1]
+            sql = "ALTER TABLE {} {};".format(name, drop)
             print(sql)
             self.db.cursor.execute(sql)
 
