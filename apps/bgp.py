@@ -125,7 +125,9 @@ class BGPConsole(AppConsole):
                 print(sql)
                 self.db.cursor.execute(sql)
 
-            drop = ["DROP COLUMN " + routes + "_" + c + "," for c in common_attr]
+            drop = ""
+            for c in common_attr:
+                drop = drop + "DROP COLUMN " + routes +  "_" + c + ","
             drop = drop[:-1]
             sql = "ALTER TABLE {} {};".format(name, drop)
             print(sql)
