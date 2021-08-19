@@ -127,16 +127,14 @@ class BGPConsole(AppConsole):
             print(sql)
             self.db.cursor.execute(sql) 
 
-            print("\nStep 4: extending values")
-            sql = "DROP TABLE IF EXISTS current_best_routes;"
-            print(sql)
-            self.db.cursor.execute(sql)
+            # print("\nStep 4: extending values")
+            # sql = "DROP TABLE IF EXISTS current_best_routes;"
+            # print(sql)
+            # self.db.cursor.execute(sql)
 
-            sql = "create table current_best_routes as select dest, set_path_val(path, condition) as path, min_len from {};".format(name)
-            print(sql)
-            self.db.cursor.execute(sql)
-
-            sql = ""
+            # sql = "create table current_best_routes as select dest, set_path_val(path, condition) as path, min_len from {};".format(name)
+            # print(sql)
+            # self.db.cursor.execute(sql)
 
         except psycopg2.ProgrammingError as e:
             print(e)
@@ -144,8 +142,42 @@ class BGPConsole(AppConsole):
 
         try:
             print('\n************************************************************************')
-            print("current best routes")
-            self.db.cursor.execute("select * from current_best_routes;")
+            self.db.cursor.execute("select * from {};".format(name))
+            data = self.db.cursor.fetchall()
+            if data is not None:
+                names = [row[0] for row in self.db.cursor.description]
+                print(tabulate.tabulate(data, headers=names))
+            print('************************************************************************')
+        except psycopg2.ProgrammingError:
+            # no results, eg from an insert/delete
+            pass
+        except TypeError as e:
+            print(e)
+
+    def do_extend_values(self, line):
+        args = line.split()
+        if len(args) != 2:
+            print("Invalid syntax") 
+            return
+
+        old_name = args[0]
+        new_name = args[1]
+
+        try:
+            sql = "DROP TABLE IF EXISTS {};".format(new_name)
+            print(sql)
+            self.db.cursor.execute(sql)
+
+            sql = "create table {} as select dest, set_path_val(path, condition) as path, min_len from {};".format(new_name, old_name)
+            print(sql)
+            self.db.cursor.execute(sql)
+        except psycopg2.ProgrammingError as e:
+            print(e)
+            return
+
+        try:
+            print('\n************************************************************************')
+            self.db.cursor.execute("select * from {};".format(new_name))
             data = self.db.cursor.fetchall()
             if data is not None:
                 names = [row[0] for row in self.db.cursor.description]
