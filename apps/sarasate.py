@@ -12,13 +12,16 @@ class RelaAlgConsole(AppConsole):
         "Execute a PostgreSQL statement"
         try:
         
-            print(line)
             data, condition, z3 = self._get_sql(line)
-            print(data)
-            print(condition)
-            print(z3)
 
-            # self.db.cursor.execute(line)
+            for d in data:
+                self.db.cursor.execute(d)
+            for c in condition:
+                if c != '':
+                    self.db.cursor.execute(c)
+            for z in z3:
+                self.db.cursor.execute(z)
+
         except psycopg2.ProgrammingError as e:
             print(e)
             return
@@ -103,17 +106,17 @@ class RelaAlgConsole(AppConsole):
             #t_result = f"{table_name}_o"
             t_result = "output"
             
-            print("Step1: Create data content\n")
+            # print("Step1: Create data content\n")
             
             sql = "DROP TABLE IF EXISTS {}; \n".format(t_result)
-            print(sql)
+            # print(sql)
             data.append(sql)
 
             # execute postgres SQL
             # self.db.cursor.execute(sql)
     
             q1 = "CREATE UNLOGGED TABLE {} AS {} \n".format(t_result, query)
-            print(q1)
+            # print(q1)
             data.append(q1)
 
             # execute postgres SQL
@@ -123,7 +126,7 @@ class RelaAlgConsole(AppConsole):
                 #result = query
                 return data, condition, z3
 
-            print("\nStep2: Update Conditions\n")
+            # print("\nStep2: Update Conditions\n")
 
         if where != None:
 
@@ -215,8 +218,8 @@ class RelaAlgConsole(AppConsole):
                         if q not in condition:
                             condition.append(q) 
 
-                            if q != '':
-                                print(q)
+                            # if q != '':
+                            #     print(q)
                                 # execute postgres SQL
                                 # self.db.cursor.execute(q)
 
@@ -262,8 +265,8 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         condition.append(q)
 
-                        if q != '':
-                            print(q)
+                        # if q != '':
+                        #     print(q)
                             # execute postgres SQL
                             # self.db.cursor.execute(q)
 
@@ -275,8 +278,8 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         condition.append(q)
 
-                        if q != '':
-                            print(q)
+                        # if q != '':
+                        #     print(q)
                             # execute postgres SQL
                             # self.db.cursor.execute(q)
 
@@ -288,8 +291,8 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         condition.append(q)
 
-                        if q != '':
-                            print(q)
+                        # if q != '':
+                        #     print(q)
                             # execute postgres SQL
                             # self.db.cursor.execute(q)
 
@@ -302,8 +305,8 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         condition.append(q)
 
-                        if q != '':
-                            print(q)
+                        # if q != '':
+                        #     print(q)
                             # execute postgres SQL
                             # self.db.cursor.execute(q)
 
@@ -315,8 +318,8 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         condition.append(q)
 
-                        if q != '':
-                            print(q)
+                        # if q != '':
+                        #     print(q)
                             # execute postgres SQL
                             # self.db.cursor.execute(q)
 
@@ -328,26 +331,26 @@ class RelaAlgConsole(AppConsole):
                             q = ''
                         condition.append(q)
 
-                        if q != '':
-                            print(q)
+                        # if q != '':
+                        #     print(q)
                             # execute postgres SQL
                             # self.db.cursor.execute(q)
 
         #result += f"SELECT * FROM {t_result};\n"
-        print("\nStep3: Normalization\n")
+        # print("\nStep3: Normalization\n")
 
         q_contra = "DELETE FROM {} WHERE is_contradiction({}.condition);\n".format(t_result, t_result)
 
         z3.append(q_contra)
 
-        print(q_contra)
+        # print(q_contra)
         # execute postgres SQL
         # self.db.cursor.execute(q_contra)
 
         q_tauto = "UPDATE {} SET condition = '{{}}' WHERE is_tauto({}.condition);\n".format(t_result, t_result)
 
         z3.append(q_tauto)
-        print(q_tauto)
+        # print(q_tauto)
         # execute postgres SQL
         # self.db.cursor.execute(q_tauto)
 
@@ -355,7 +358,7 @@ class RelaAlgConsole(AppConsole):
         q_rm = "UPDATE {} SET condition = remove_redundant(condition) where has_redundant(condition);\n".format(t_result)
         z3.append(q_rm)
 
-        print(q_rm)
+        # print(q_rm)
         # execute postgres SQL
         # self.db.cursor.execute(q_rm)
 
@@ -389,13 +392,13 @@ class RelaAlgConsole(AppConsole):
         common_attr=[val for val in t1_attr if val in t2_attr and val != 'condition']
         union_attr = list(set(t1_attr).union(set(t2_attr)))
 
-        print("Step1: Create Data Content\n")
+        # print("Step1: Create Data Content\n")
         sql = "DROP TABLE IF EXISTS {};\n".format(t_result)
-        print(sql)
+        # print(sql)
         data.append(sql) 
 
         # execute postgres SQL
-        self.db.cursor.execute(sql)
+        # self.db.cursor.execute(sql)
 
         slt_attr = ""
 
@@ -442,7 +445,7 @@ class RelaAlgConsole(AppConsole):
             sql = "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {} WHERE {}; \n".format(t_result, slt_attr, table1, table2, join_cond, where_cond)
             data.append(sql)
             
-            print(sql)
+            # print(sql)
             # execute postgres SQL
             # self.db.cursor.execute(sql)
 
@@ -450,32 +453,32 @@ class RelaAlgConsole(AppConsole):
             sql = "CREATE UNLOGGED TABLE {} AS SELECT {} FROM {} INNER JOIN {} on {}; \n".format(t_result, slt_attr, table1, table2, join_cond)
             data.append(sql)
 
-            print(sql)
+            # print(sql)
             # execute postgres SQL
             # self.db.cursor.execute(sql)
         
         #result += f"SELECT * FROM {t_result};\n"
 
-        print("\nStep2: Update Conditions\n")
+        # print("\nStep2: Update Conditions\n")
 
         #result += f"UPDATE {t_result} SET cond =  array_cat(cond, {table2}_cond);\n"
-        print("\n2.1: Insert Join Conditions\n")
+        # print("\n2.1: Insert Join Conditions\n")
         for attr in common_attr:
             #result += f"UPDATE {t_result} SET cond = array_append(cond, {attr} || ' == ' || {table2}_{attr})  WHERE  (is_var({t_result}.{attr}) OR is_var({t_result}.{table2}_{attr}) );"
             sql = "UPDATE {} SET condition = array_append(condition, {} || ' == ' || {}_{});\n".format(t_result, attr, table2, attr)
             condition.append(sql)
 
-            print(sql)
+            # print(sql)
             # execute postgres SQL
             # self.db.cursor.execute(sql)
         join_attr = ""
 
-        print("2.2: Projection and drop duplicated attributes\n")
+        # print("2.2: Projection and drop duplicated attributes\n")
         for attr in common_attr:
             sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});\n".format(t_result, attr, table2, attr, attr)
             condition.append(sql)
             
-            print(sql)
+            # print(sql)
             # execute postgres SQL
             # self.db.cursor.execute(sql)
 
@@ -488,7 +491,7 @@ class RelaAlgConsole(AppConsole):
         sql = "ALTER TABLE {} {}; \n".format(t_result, q_dropcol)
         condition.append(sql)
 
-        print(sql)
+        # print(sql)
         # execute postgres SQL
         # self.db.cursor.execute(sql)
 
