@@ -27,14 +27,11 @@ class RelaAlgConsole(AppConsole):
             return
 
         try:
-            print('************************************************************************')
-            print(line)
             self.db.cursor.execute("select * from output;")
             data = self.db.cursor.fetchall()
             if data is not None:
                 names = [row[0] for row in self.db.cursor.description]
                 print(tabulate.tabulate(data, headers=names))
-            print('************************************************************************')
         except psycopg2.ProgrammingError:
             # no results, eg from an insert/delete
             pass
@@ -42,9 +39,28 @@ class RelaAlgConsole(AppConsole):
             print(e)
 
     def do_data(self, line):
-        query = line
-        
-        
+        data, _, _ = self._get_sql(line)
+
+        print("Step1: Create data content\n")
+        for d in data:
+            print(d)
+            self.db.cursor.execute(d)
+
+    def do_condition(self, line):
+        _, condition, _ = self._get_sql(line)
+
+        print("\nStep2: Update Conditions\n")
+        for c in condition:
+            if c != '':
+                print(c)
+                self.db.cursor.execute(c)
+
+    def do_z3(self, line):
+        _, _, z3 = self._get_sql(line)
+        print("\nStep3: Normalization\n")
+        for z in z3:
+            print(z)
+            self.db.cursor.execute(z)
 
     def _get_sql(self, query):
 
