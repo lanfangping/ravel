@@ -34,6 +34,85 @@ class RelaAlgConsole(AppConsole):
             pass
         except TypeError as e:
             print(e)
+
+    def do_data(self, line):
+        query = line
+        
+        if 'WHERE' in query:
+            qlist = query.split('WHERE')
+            query = qlist[0].lower() + ' where ' + qlist[1]
+        elif 'where' in query:
+            qlist = query.split('where')
+            query = qlist[0].lower() + ' where ' + qlist[1]
+        else: query = query.lower()    
+        #select = re.split("select|from",query)
+        p1 = re.compile(r'select(.*?)from', re.S) 
+        select =  re.findall(p1, query)[0].strip()
+
+        if 'from' in query:
+            if 'where' in query:
+                p2 = re.compile(r'from(.*?)where', re.S) 
+            else: p2 = re.compile(r'from(.*?);', re.S) 
+        table_name =  re.findall(p2, query)[0].strip()
+
+        if 'where' in query:
+            p3 = re.compile(r'where(.*?);', re.S) 
+            where =  re.findall(p3, query)[0].strip()
+            # where = where.upper()
+        else:
+            where = None
+
+        query_list = re.split("select|from|join|where",query)
+
+        if 'join' in query and 'join' in table_name:
+            #print('JOIN CASE')
+            table1 = table_name.split('join')[0].strip()
+            table2 = table_name.split('join')[1].strip()
+
+            table1_info = table1.lower()
+            table2_info = table2.lower()
+        
+            table1_name =  table1_info.split('(')[0].strip()
+            table2_name =  table2_info.split('(')[0].strip()
+            #t_result = f"{table1_name}_join_{table2_name}"
+            t_result = "output"
+            result = ""
+            #result = f"Optional: DROP TABLE IF EXISTS {t_result}; \n\n"
+
+            if where == None:
+                result += self._cjoin(table1, table2,'')
+            else:
+                result += self._cjoin(table1,table2,where)
+                #result += f"SELECT * FROM cjoin('{table1}', '{table2}');"
+                # result += f"CREATE TABLE {t_result}_temp AS SELECT * from {t_result} where {where};"
+                # result += f"DROP TABLE IF EXISTS {t_result};"
+                # result += f"ALTER TABLE {t_result}_temp RENAME TO {t_result};"
+        if 'join' not in query:
+            #t_result = f"{table_name}_o"
+            t_result = "output"
+            result = ""
+            
+            result += "Step1: Create data content\n"
+            print("Step1: Create data content\n")
+            
+            sql = "DROP TABLE IF EXISTS {}; \n".format(t_result)
+            print(sql)
+            result += sql
+
+            # execute postgres SQL
+            self.db.cursor.execute(sql)
+    
+            q1 = "CREATE UNLOGGED TABLE {} AS {} \n".format(t_result, query)
+            print(q1)
+            result+=q1
+
+            # execute postgres SQL
+            self.db.cursor.execute(q1)
+
+            if where == None:
+                #result = query
+                return result
+
     def _get_sql(self, query):
         #print("INPUT: " + query + "\n")
         #t_result = 't_result'
