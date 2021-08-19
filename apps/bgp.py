@@ -69,6 +69,9 @@ class BGPConsole(AppConsole):
         union_attr = set(policy_cols).union(set(routes_cols))
         diff_attr = union_attr - common_attr - set('condition')
 
+        print("common: ", common_attr)
+        print("diff: ", diff_attr)
+
         sql_attr = ""
         sql_equal = ""
         for c in common_attr:
@@ -79,7 +82,7 @@ class BGPConsole(AppConsole):
             elif isinstance(c, int):
                 sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
 
-        sql_equal = sql_equal[: -3]
+        sql_equal = sql_equal[: -4]
 
         for d in diff_attr:
             sql_attr += "{},".format(d)
