@@ -3,8 +3,8 @@
 ------------------------------------------------------------
 
 /* This doesn't do anything interesting, just create a table */
-DROP TABLE IF EXISTS relational_algebra CASCADE;
-CREATE UNLOGGED TABLE relational_algebra (
+DROP TABLE IF EXISTS sarasate CASCADE;
+CREATE UNLOGGED TABLE sarasate (
        id  integer PRIMARY KEY
 );
 
@@ -58,12 +58,12 @@ insert into instance2 ( DEST,PATH, CONDITION) values
 ('1.2.3.5','[ADC]','{"1.2.3.5 != 1.2.3.5", "1.2.3.5 != 1.2.3.4"}');
 
 /* Violation: */
-CREATE OR REPLACE VIEW relational_algebra_violation AS (
+CREATE OR REPLACE VIEW sarasate_violation AS (
        SELECT id
-       FROM relational_algebra
+       FROM sarasate
 );
 
 /* Repair */
-CREATE OR REPLACE RULE relational_algebra_repair AS
-       ON DELETE TO relational_algebra_violation
+CREATE OR REPLACE RULE sarasate_repair AS
+       ON DELETE TO sarasate_violation
        DO NOTHING;

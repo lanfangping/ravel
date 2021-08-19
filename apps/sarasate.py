@@ -572,6 +572,6 @@ class RelaAlgConsole(AppConsole):
 
         return result
 
-shortcut = "ra"
+shortcut = "s"
 description = "execute a relational algebra"
 console = RelaAlgConsole
