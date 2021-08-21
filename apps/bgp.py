@@ -186,7 +186,8 @@ class BGPConsole(AppConsole):
                     self.db.cursor.execute(sql)
 
                 # remove the spare ,
-                attr_drop = attr_drop[:-2]
+                # attr_drop = attr_drop[:-2]
+                attr_drop = attr_drop + "drop column len_path"
                 sql = "alter table output {};".format(attr_drop)
                 self.db.cursor.execute(sql)
 
