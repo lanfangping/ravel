@@ -34,8 +34,8 @@ CREATE UNLOGGED TABLE routes (
  * dest: IP prefix
  * path: AS path
  */
-DROP TABLE IF EXISTS routes CASCADE;
-CREATE UNLOGGED TABLE routes (
+DROP TABLE IF EXISTS current_best_routes CASCADE;
+CREATE UNLOGGED TABLE current_best_routes (
        dest TEXT,
        path TEXT,
        min_len integer
