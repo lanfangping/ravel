@@ -174,8 +174,12 @@ class BGPConsole(AppConsole):
 
                 attr_drop = ""
                 for c in common_attr:
-                    sql = "update output set {} = {}_{} where not is_var({})".format(c, t2_name, c, c)
                     attr_drop = attr_drop + "drop column {}_{}, ".format(t2_name, c)
+
+                    if 'len' in c:
+                        continue
+
+                    sql = "update output set {} = {}_{} where not is_var({})".format(c, t2_name, c, c)
                     self.db.cursor.execute(sql)
 
                 # remove the spare ,
