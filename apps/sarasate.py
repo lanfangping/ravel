@@ -134,7 +134,12 @@ class RelaAlgConsole(AppConsole):
                 for d in diff_attr:
                     attr_diff += " {},".format(d)
 
-                attr_diff += "array_cat({}.condition, {}.condition) as condition".format(t1_name, t2_name)
+                if 'condition' in t1_attrs and 'condition' in t2_attrs:
+                    attr_diff += "array_cat({}.condition, {}.condition) as condition".format(t1_name, t2_name)
+                elif 'condition' in t1_attrs or 'condition' in t2_attrs:
+                    attr_diff += "condition"
+                else:
+                    attr_diff = attr_diff
 
                 # print("Step1: Create Data Content")
                 sql = "create table output as select {} {} FROM {} where ".format(attr_equal, attr_diff, from_clause) + where_clause
