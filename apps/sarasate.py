@@ -9,16 +9,6 @@ class RelaAlgConsole(AppConsole):
     def default(self, line):
         "Execute a PostgreSQL statement"
         try:
-        
-            # data, condition, z3 = self._get_sql(line)
-
-            # for d in data:
-            #     self.db.cursor.execute(d)
-            # for c in condition:
-            #     if c != '':
-            #         self.db.cursor.execute(c)
-            # for z in z3:
-            #     self.db.cursor.execute(z)
             select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
             self.generator(select_clause, from_clause, defined_where_clause, where_lists)
 
@@ -135,9 +125,6 @@ class RelaAlgConsole(AppConsole):
                 union_attr = set(t1_attrs).union(set(t2_attrs)) - set(['condition'])
                 diff_attr = union_attr - common_attr
 
-                print(common_attr)
-                print(diff_attr)
-
                 attr_diff = ""
                 attr_equal = ""
                 
@@ -149,12 +136,11 @@ class RelaAlgConsole(AppConsole):
 
                 attr_diff += "array_cat({}.condition, {}.condition) as condition".format(t1_name, t2_name)
 
-                print("Step1: Create Data Content")
+                # print("Step1: Create Data Content")
                 sql = "create table output as select {} {} FROM {} where ".format(attr_equal, attr_diff, from_clause) + where_clause
-                print(sql)
                 self.db.cursor.execute(sql)
 
-                print("Step2: Update Condition")
+                # print("Step2: Update Condition")
 
                 for w in where_lists:
                     args = w.strip().split(' ')
@@ -178,27 +164,24 @@ class RelaAlgConsole(AppConsole):
                 for c in common_attr:
                     sql = "update output set {} = {}_{} where not is_var({})".format(c, t2_name, c, c)
                     attr_drop = attr_drop + "drop column {}_{}, ".format(t2_name, c)
-                    print(sql)
                     self.db.cursor.execute(sql)
 
                 # remove the spare ,
                 attr_drop = attr_drop[:-2]
                 sql = "alter table output {};".format(attr_drop)
-                print(sql)
                 self.db.cursor.execute(sql)
 
             else:
                 print("still working")   
         else:
-            print('selection')
-            print('Step1: Create Data Content')
+            # print('selection')
+            # print('Step1: Create Data Content')
             sql = 'create table output as '
 
             sql = sql + select_clause + ' where '+ where_clause + ';'
-            print(sql)
             self.db.cursor.execute(sql)
 
-            print('Step2: Update Condition')
+            # print('Step2: Update Condition')
             for w in where_lists:
                 args = w.strip().split(' ')
                 left = args[0].strip()
@@ -209,19 +192,17 @@ class RelaAlgConsole(AppConsole):
                     opr = opr.replace('=', '==')
                 
                 sql = "update output set condition = array_append(condition, {} || ' {} ' || {});".format(left, opr, right)
-                print(sql)
                 self.db.cursor.execute(sql)
 
 
         print('Step3: Normalization')
         sql = 'delete from output where is_contradiction(condition);'
-        print(sql)
+
         self.db.cursor.execute(sql)
         sql = "UPDATE output SET condition = '{}' WHERE is_tauto(condition);"
-        print(sql)
+
         self.db.cursor.execute(sql)
         sql = "UPDATE output SET condition = remove_redundant(condition) WHERE has_redundant(condition);"
-        print(sql)
         self.db.cursor.execute(sql)
 
     def do_data(self, line):
@@ -276,9 +257,6 @@ class RelaAlgConsole(AppConsole):
                 union_attr = set(t1_attrs).union(set(t2_attrs)) - set(['condition'])
                 diff_attr = union_attr - common_attr
 
-                print(common_attr)
-                print(diff_attr)
-
                 attr_diff = ""
                 attr_equal = ""
                 
@@ -290,17 +268,16 @@ class RelaAlgConsole(AppConsole):
 
                 attr_diff += "array_cat({}.condition, {}.condition) as condition".format(t1_name, t2_name)
 
-                print("Step1: Create Data Content")
+                # print("Step1: Create Data Content")
                 sql = "create table output as select {} {} FROM {} where ".format(attr_equal, attr_diff, from_clause) + where_clause
-                print(sql)
                 self.db.cursor.execute(sql)
 
             else:
                 print("still working")
     
         else:
-            print('selection')
-            print('Step1: Create Data Content')
+            # print('selection')
+            # print('Step1: Create Data Content')
             sql = 'create table output as '
 
             sql = sql + select_clause + ' where '+ where_clause + ';'
@@ -336,10 +313,7 @@ class RelaAlgConsole(AppConsole):
                 union_attr = set(t1_attrs).union(set(t2_attrs)) - set(['condition'])
                 diff_attr = union_attr - common_attr
 
-                print(common_attr)
-                print(diff_attr)
-
-                print("Step2: Update Condition")
+                # print("Step2: Update Condition")
 
                 for w in where_lists:
                     args = w.strip().split(' ')
@@ -365,13 +339,11 @@ class RelaAlgConsole(AppConsole):
                 for c in common_attr:
                     sql = "update output set {} = {}_{} where not is_var({})".format(c, t2_name, c, c)
                     attr_drop = attr_drop + "drop column {}_{}, ".format(t2_name, c)
-                    print(sql)
                     self.db.cursor.execute(sql)
 
                 # remove the spare ,
                 attr_drop = attr_drop[:-2]
                 sql = "alter table output {};".format(attr_drop)
-                print(sql)
                 self.db.cursor.execute(sql)
             else:
                 print("still working")
@@ -379,7 +351,7 @@ class RelaAlgConsole(AppConsole):
     
         else:
 
-            print('Step2: Update Condition')
+            # print('Step2: Update Condition')
             for w in where_lists:
                 args = w.strip().split(' ')
                 left = args[0].strip()
@@ -390,20 +362,18 @@ class RelaAlgConsole(AppConsole):
                     opr = opr.replace('=', '==')
                 
                 sql = "update output set condition = array_append(condition, {} || ' {} ' || {});".format(left, opr, right)
-                print(sql)
                 self.db.cursor.execute(sql)
 
 
     def _z3(self):
-        print('Step3: Normalization')
+        # print('Step3: Normalization')
         sql = 'delete from output where is_contradiction(condition);'
-        print(sql)
         self.db.cursor.execute(sql)
+
         sql = "UPDATE output SET condition = '{}' WHERE is_tauto(condition);"
-        print(sql)
         self.db.cursor.execute(sql)
+
         sql = "UPDATE output SET condition = remove_redundant(condition) WHERE has_redundant(condition);"
-        print(sql)
         self.db.cursor.execute(sql)
 
 shortcut = "s"
