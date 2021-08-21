@@ -171,6 +171,7 @@ class BGPConsole(AppConsole):
                 
                 # add shortest path policy condition
                 sql = "update output set condition = array_append(condition, 'l(' || path || ') == ' || l(path));"
+                self.db.cursor.execute(sql)
 
                 attr_drop = ""
                 for c in common_attr:
