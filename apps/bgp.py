@@ -230,7 +230,13 @@ class BGPConsole(AppConsole):
     default file: 2021.06.10 00:00
     '''
     def do_load(self,line):
-        "Load data which inferred from BGP RouteView RIB and UPDATE file"
+        """
+        Load realistic data.
+        Source: MRT format RIBs and UPDATEs from route-views2.oregon-ix.net
+        Date: 2021.06.10 00:00    
+        1. bgp_policy and current_best_routes are generated from RIB
+        2. routes_delta are generated from UPDATE
+        """
         # args = line.split()
         # if len(args) != 2:
         #     print("Invalid syntax") 
@@ -244,7 +250,13 @@ class BGPConsole(AppConsole):
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
     
     def do_loaddemo(self, line):
-        "Load sample data which inferred from BGP RouteView RIB and UPDATE file"
+        """
+        Load sample data from realistic data.
+        Source: MRT format RIBs and UPDATEs from route-views2.oregon-ix.net
+        Date: 2021.06.10 00:00    
+        1. bgp_policy and current_best_routes are generated from RIB
+        2. routes_delta are generated from UPDATE
+        """
         ptable = [
             ['1.6.68.0/22', 'x579', 2, '{"l(x579) <= 2"}'],
             ['1.6.4.0/22', 'x531', 2, '{"l(x531) <= 2"}'],

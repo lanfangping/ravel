@@ -386,5 +386,5 @@ class RelaAlgConsole(AppConsole):
         self.db.cursor.execute(sql)
 
 shortcut = "s"
-description = "execute a relational algebra"
+description = "Relational Algebra for Conditional Table."
 console = RelaAlgConsole
