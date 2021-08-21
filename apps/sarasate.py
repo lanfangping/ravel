@@ -159,8 +159,14 @@ class RelaAlgConsole(AppConsole):
                 for w in where_lists:
                     args = w.strip().split(' ')
                     left = args[0].strip()
+                    if '.' in left:
+                        left = left.replace(t1_name + '.', '')
+
                     opr = args[1].strip()
+
                     right = args[2].strip()
+                    if '.' in right:
+                        right = right.replace('.', '_')
                     # repalce = with == in order accommodate z3
                     if '!=' not in opr and '<=' not in opr and '>=' not in opr and '=' in opr:
                         opr = opr.replace('=', '==')
