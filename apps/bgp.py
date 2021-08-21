@@ -145,8 +145,6 @@ class BGPConsole(AppConsole):
                 else:
                     attr_diff = attr_diff
                 
-                print(where_clause)
-
                 # print("Step1: Create Data Content")
                 sql = "create table output as select {} {} FROM {} where ".format(attr_equal, attr_diff, from_clause) + where_clause
                 self.db.cursor.execute(sql)
