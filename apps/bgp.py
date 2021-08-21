@@ -1,6 +1,7 @@
 from ravel.app import AppConsole
 import psycopg2
 import tabulate
+import re
 
 rib_file = './topo/RouteView/rib.txt'
 upd_file = './topo/RouteView/update.txt'
