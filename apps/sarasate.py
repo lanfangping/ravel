@@ -226,7 +226,8 @@ class RelaAlgConsole(AppConsole):
 
     def do_data(self, line):
         "Create data content."
-
+        self.db.cursor.execute("drop table if exists output")
+        
         select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
         self.generator(select_clause, from_clause, defined_where_clause, where_lists)
         
