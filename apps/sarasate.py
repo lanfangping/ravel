@@ -177,7 +177,7 @@ class RelaAlgConsole(AppConsole):
                 attr_drop = ""
                 for c in common_attr:
                     sql = "update output set {} = {}_{} where not is_var({})".format(c, t2_name, c, c)
-                    attr_drop = attr_drop + "drop cloumn {}_{}, ".format(t2_name, c)
+                    attr_drop = attr_drop + "drop column {}_{}, ".format(t2_name, c)
                     print(sql)
                     self.db.cursor.execute(sql)
 
