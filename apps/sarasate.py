@@ -195,7 +195,7 @@ class RelaAlgConsole(AppConsole):
                 self.db.cursor.execute(sql)
 
 
-        print('Step3: Normalization')
+        # print('Step3: Normalization')
         sql = 'delete from output where is_contradiction(condition);'
 
         self.db.cursor.execute(sql)
