@@ -226,18 +226,13 @@ class RelaAlgConsole(AppConsole):
 
     def do_data(self, line):
         "Create data content."
-        self.db.cursor.execute("drop table if exists output")
-        
+
         select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
-        self.generator(select_clause, from_clause, defined_where_clause, where_lists)
-        
         self._data(select_clause, from_clause, defined_where_clause, where_lists)
 
     def do_condition(self, line):
         "Update Conditions"
         select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
-        self.generator(select_clause, from_clause, defined_where_clause, where_lists)
-        
         self._condition(select_clause, from_clause, defined_where_clause, where_lists)
 
         # _, condition, _ = self._get_sql(line)
@@ -252,6 +247,8 @@ class RelaAlgConsole(AppConsole):
         self._z3()
 
     def _data(self, select_clause, from_clause, where_clause, where_lists):
+        self.db.cursor.execute("drop table if exists output")
+
         '''
         The number of tables is greater than 1, it is join operation
         else, it is selection
