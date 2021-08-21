@@ -170,7 +170,7 @@ class BGPConsole(AppConsole):
                     self.db.cursor.execute(sql)
                 
                 # add shortest path policy condition
-                sql = "update output set condition = array_append(condition, 'l(' || path || ') == ' || l(path));"
+                sql = "update output set condition = array_append(condition, 'l(' || path || ') == ' || l({}_path));".format(t2_name)
                 self.db.cursor.execute(sql)
 
                 attr_drop = ""
