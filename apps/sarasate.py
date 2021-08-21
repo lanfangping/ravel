@@ -106,6 +106,8 @@ class RelaAlgConsole(AppConsole):
         return select_clause, from_clause, defined_where_clause, where_lists
 
     def generator(self, select_clause, from_clause, where_clause, where_lists):
+        self.db.cursor.execute("drop table output if exists")
+
         '''
         The number of tables is greater than 1, it is join operation
         else, it is selection
