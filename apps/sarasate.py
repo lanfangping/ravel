@@ -163,7 +163,7 @@ class RelaAlgConsole(AppConsole):
                     if '!=' not in opr and '<=' not in opr and '>=' not in opr and '=' in opr:
                         opr = opr.replace('=', '==')
                     
-                    sql = "update output set conditon = array_append(condition, {} || '{}' || {});".format(left, opr, right)
+                    sql = "update output set condition = array_append(condition, {} || '{}' || {});".format(left, opr, right)
                     self.db.cursor.execute(sql)
 
                 attr_drop = ""
