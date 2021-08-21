@@ -30,6 +30,17 @@ CREATE UNLOGGED TABLE routes (
        min_len integer
 );
 
+/* current best routing table for BGP simulation -- from RIB files
+ * dest: IP prefix
+ * path: AS path
+ */
+DROP TABLE IF EXISTS routes CASCADE;
+CREATE UNLOGGED TABLE routes (
+       dest TEXT,
+       path TEXT,
+       min_len integer
+);
+
 /* Routes Updates -- from UPDATE files
  * dest: IP prefix
  * operation: A (Annoucement), W (Withdrawal)
