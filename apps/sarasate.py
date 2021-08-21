@@ -226,31 +226,29 @@ class RelaAlgConsole(AppConsole):
 
     def do_data(self, line):
         "Create data content."
-        data, _, _ = self._get_sql(line)
 
-        print("Step1: Create data content\n")
-        for d in data:
-            print(d)
-            self.db.cursor.execute(d)
+        select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
+        self.generator(select_clause, from_clause, defined_where_clause, where_lists)
+        
+        self._data(select_clause, from_clause, defined_where_clause, where_lists)
 
     def do_condition(self, line):
         "Update Conditions"
+        select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
+        self.generator(select_clause, from_clause, defined_where_clause, where_lists)
+        
+        self._condition(select_clause, from_clause, defined_where_clause, where_lists)
 
-        _, condition, _ = self._get_sql(line)
+        # _, condition, _ = self._get_sql(line)
 
-        print("\nStep2: Update Conditions\n")
-        for c in condition:
-            if c != '':
-                print(c)
-                self.db.cursor.execute(c)
+        # print("\nStep2: Update Conditions\n")
+        # for c in condition:
+        #     if c != '':
+        #         print(c)
+        #         self.db.cursor.execute(c)
 
     def do_z3(self, line):
-        "Normalization"
-        _, _, z3 = self._get_sql(line)
-        print("\nStep3: Normalization\n")
-        for z in z3:
-            print(z)
-            self.db.cursor.execute(z)
+        self._z3()
 
     def _data(self, select_clause, from_clause, where_clause, where_lists):
         '''
