@@ -281,130 +281,130 @@ class BGPConsole(AppConsole):
         self.db.cursor.executemany("INSERT INTO current_best_routes(dest, path, min_len) VALUES (%s, %s, %s);", current_best_routes)
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
 
-    def do_join(self, line):
-        """Do join operation. 
-        Format: join <table_1> <table_2>"""
-        args = line.split()
-        if len(args) != 2:
-            print("Invalid syntax") 
-            return
+    # def do_join(self, line):
+    #     """Do join operation. 
+    #     Format: join <table_1> <table_2>"""
+    #     args = line.split()
+    #     if len(args) != 2:
+    #         print("Invalid syntax") 
+    #         return
         
-        policy = args[0]
-        routes = args[1]
+    #     policy = args[0]
+    #     routes = args[1]
 
-        self.db.cursor.execute("select * from {};".format(policy))
-        policy_cols = [row[0] for row in self.db.cursor.description]
+    #     self.db.cursor.execute("select * from {};".format(policy))
+    #     policy_cols = [row[0] for row in self.db.cursor.description]
 
-        self.db.cursor.execute("select * from {};".format(routes))
-        routes_cols = [row[0] for row in self.db.cursor.description]
+    #     self.db.cursor.execute("select * from {};".format(routes))
+    #     routes_cols = [row[0] for row in self.db.cursor.description]
 
-        common_attr= set(policy_cols).intersection(set(routes_cols)) - set(['condition'])
-        union_attr = set(policy_cols).union(set(routes_cols)) - set(['condition'])
-        diff_attr = union_attr - common_attr
+    #     common_attr= set(policy_cols).intersection(set(routes_cols)) - set(['condition'])
+    #     union_attr = set(policy_cols).union(set(routes_cols)) - set(['condition'])
+    #     diff_attr = union_attr - common_attr
 
-        print("common: ", common_attr)
-        print("diff: ", diff_attr)
+    #     print("common: ", common_attr)
+    #     print("diff: ", diff_attr)
 
-        sql_attr = ""
-        sql_equal = ""
-        for c in common_attr:
-            sql_attr += "{}.{}, {}.{} AS {}_{},".format(policy, c, routes, c, routes, c)
+    #     sql_attr = ""
+    #     sql_equal = ""
+    #     for c in common_attr:
+    #         sql_attr += "{}.{}, {}.{} AS {}_{},".format(policy, c, routes, c, routes, c)
 
-            if 'len' in c:
-                sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
-            else:
-                sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
+    #         if 'len' in c:
+    #             sql_equal += "{}.{} = {}.{} and ".format(policy, c, routes, c)
+    #         else:
+    #             sql_equal += "equal({}.{}, {}.{}) and ".format(policy, c, routes, c)
 
-        sql_equal = sql_equal[: -4]
+    #     sql_equal = sql_equal[: -4]
 
-        for d in diff_attr:
-            sql_attr += "{},".format(d)
+    #     for d in diff_attr:
+    #         sql_attr += "{},".format(d)
 
-        sql_attr += "{}.condition".format(policy)
+    #     sql_attr += "{}.condition".format(policy)
 
-        name = "{}_join_{}".format(policy, routes)
-        try:
-            print("select * from {}(dest, path, min_len, condition) join {}(dest, path, min_len)\n".format(policy, routes))
-            print("Step1: Create Data Content")
-            print("DROP TABLE IF EXISTS {};".format(name))
-            self.db.cursor.execute("DROP TABLE IF EXISTS {};".format(name))
+    #     name = "{}_join_{}".format(policy, routes)
+    #     try:
+    #         print("select * from {}(dest, path, min_len, condition) join {}(dest, path, min_len)\n".format(policy, routes))
+    #         print("Step1: Create Data Content")
+    #         print("DROP TABLE IF EXISTS {};".format(name))
+    #         self.db.cursor.execute("DROP TABLE IF EXISTS {};".format(name))
 
-            sql = "CREATE UNLOGGED TABLE {} AS SELECT ".format(name) + \
-                    sql_attr + \
-                    " FROM {}, {} where ".format(policy, routes) + \
-                    sql_equal + "; "
-            print(sql)
-            self.db.cursor.execute(sql)
+    #         sql = "CREATE UNLOGGED TABLE {} AS SELECT ".format(name) + \
+    #                 sql_attr + \
+    #                 " FROM {}, {} where ".format(policy, routes) + \
+    #                 sql_equal + "; "
+    #         print(sql)
+    #         self.db.cursor.execute(sql)
 
-            print("\nStep2: Update Conditions\n \
-                    2.1: Insert Join Conditions")
+    #         print("\nStep2: Update Conditions\n \
+    #                 2.1: Insert Join Conditions")
 
-            for c in common_attr:
-                sql = "UPDATE {} SET condition = array_append(condition, {} || ' == ' || {}_{});".format(name, c, routes, c)
-                print(sql)
-                self.db.cursor.execute(sql)
+    #         for c in common_attr:
+    #             sql = "UPDATE {} SET condition = array_append(condition, {} || ' == ' || {}_{});".format(name, c, routes, c)
+    #             print(sql)
+    #             self.db.cursor.execute(sql)
 
-            sql = "update {} set condition = array_append(condition, 'l(' || path || ') == ' || l({}_path));".format(name, routes)
-            print(sql)
-            self.db.cursor.execute(sql)
+    #         sql = "update {} set condition = array_append(condition, 'l(' || path || ') == ' || l({}_path));".format(name, routes)
+    #         print(sql)
+    #         self.db.cursor.execute(sql)
 
-            print("2.2: Projection and drop duplicated attributes")
+    #         print("2.2: Projection and drop duplicated attributes")
 
-            for c in common_attr:
-                if 'len' in c:
-                    sql = "UPDATE {} SET {} = {}_{} WHERE {} > {}_{};".format(name, c, routes, c, c, routes, c)
-                else:
-                    sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});".format(name, c, routes, c, c)
-                print(sql)
-                self.db.cursor.execute(sql)
+    #         for c in common_attr:
+    #             if 'len' in c:
+    #                 sql = "UPDATE {} SET {} = {}_{} WHERE {} > {}_{};".format(name, c, routes, c, c, routes, c)
+    #             else:
+    #                 sql = "UPDATE {} SET {} = {}_{} WHERE not is_var({});".format(name, c, routes, c, c)
+    #             print(sql)
+    #             self.db.cursor.execute(sql)
 
-            drop = ""
-            for c in common_attr:
-                drop = drop + "DROP COLUMN " + routes +  "_" + c + ","
-            drop = drop[:-1]
-            sql = "ALTER TABLE {} {};".format(name, drop)
-            print(sql)
-            self.db.cursor.execute(sql)
+    #         drop = ""
+    #         for c in common_attr:
+    #             drop = drop + "DROP COLUMN " + routes +  "_" + c + ","
+    #         drop = drop[:-1]
+    #         sql = "ALTER TABLE {} {};".format(name, drop)
+    #         print(sql)
+    #         self.db.cursor.execute(sql)
 
-            print("\nStep3: Normalization\n")
-            sql = "DELETE FROM {} WHERE is_contradiction(condition);".format(name)
-            print(sql)
-            self.db.cursor.execute(sql)
+    #         print("\nStep3: Normalization\n")
+    #         sql = "DELETE FROM {} WHERE is_contradiction(condition);".format(name)
+    #         print(sql)
+    #         self.db.cursor.execute(sql)
 
-            sql = "UPDATE {} SET condition = '{{}}' WHERE is_tauto(condition);".format(name)
-            print(sql)
-            self.db.cursor.execute(sql)
+    #         sql = "UPDATE {} SET condition = '{{}}' WHERE is_tauto(condition);".format(name)
+    #         print(sql)
+    #         self.db.cursor.execute(sql)
 
-            sql = "UPDATE {} SET condition = remove_redundant(condition) where has_redundant(condition);".format(name)
-            print(sql)
-            self.db.cursor.execute(sql) 
+    #         sql = "UPDATE {} SET condition = remove_redundant(condition) where has_redundant(condition);".format(name)
+    #         print(sql)
+    #         self.db.cursor.execute(sql) 
 
-            # print("\nStep 4: extending values")
-            # sql = "DROP TABLE IF EXISTS current_best_routes;"
-            # print(sql)
-            # self.db.cursor.execute(sql)
+    #         # print("\nStep 4: extending values")
+    #         # sql = "DROP TABLE IF EXISTS current_best_routes;"
+    #         # print(sql)
+    #         # self.db.cursor.execute(sql)
 
-            # sql = "create table current_best_routes as select dest, set_path_val(path, condition) as path, min_len from {};".format(name)
-            # print(sql)
-            # self.db.cursor.execute(sql)
+    #         # sql = "create table current_best_routes as select dest, set_path_val(path, condition) as path, min_len from {};".format(name)
+    #         # print(sql)
+    #         # self.db.cursor.execute(sql)
 
-        except psycopg2.ProgrammingError as e:
-            print(e)
-            return
+    #     except psycopg2.ProgrammingError as e:
+    #         print(e)
+    #         return
 
-        try:
-            print('\n************************************************************************')
-            self.db.cursor.execute("select * from {};".format(name))
-            data = self.db.cursor.fetchall()
-            if data is not None:
-                names = [row[0] for row in self.db.cursor.description]
-                print(tabulate.tabulate(data, headers=names))
-            print('************************************************************************')
-        except psycopg2.ProgrammingError:
-            # no results, eg from an insert/delete
-            pass
-        except TypeError as e:
-            print(e)
+    #     try:
+    #         print('\n************************************************************************')
+    #         self.db.cursor.execute("select * from {};".format(name))
+    #         data = self.db.cursor.fetchall()
+    #         if data is not None:
+    #             names = [row[0] for row in self.db.cursor.description]
+    #             print(tabulate.tabulate(data, headers=names))
+    #         print('************************************************************************')
+    #     except psycopg2.ProgrammingError:
+    #         # no results, eg from an insert/delete
+    #         pass
+    #     except TypeError as e:
+    #         print(e)
 
     def do_extend_values(self, line):
         """Extend values in condtion column to variables and rename the table name
@@ -467,7 +467,7 @@ class BGPConsole(AppConsole):
                     WHERE {}.min_len > {}.len_path \
                     AND {}.dest = {}.dest;".format(policy, delta, policy, delta, delta, policy, delta, policy, delta)
             
-            print(sql)
+            # print(sql)
             self.db.cursor.execute(sql)
         except psycopg2.ProgrammingError as e:
             print(e)
@@ -491,11 +491,12 @@ class BGPConsole(AppConsole):
         current = args[0]
         delta = args[1]
 
-        name = "{}_union_{}".format(current, delta)
+        # name = "{}_union_{}".format(current, delta)
+        name = "new_routes"
 
         try:
             sql = "DROP TABLE IF EXISTS {};".format(name)
-            print(sql)
+            # print(sql)
             self.db.cursor.execute(sql)
 
             sql = "create table {} as select dest, path, min_len as len_path \
@@ -505,7 +506,7 @@ class BGPConsole(AppConsole):
                     ) \
                     union select dest, path, len_path \
                     from {};".format(name, current, delta, delta)
-            print(sql)
+            # print(sql)
             self.db.cursor.execute(sql)
         except psycopg2.ProgrammingError as e:
             print(e)
@@ -525,33 +526,33 @@ class BGPConsole(AppConsole):
         except TypeError as e:
             print(e)
     
-    def do_rename(self, line):
-        """Rename table name or column name. 
-        Usage: rename [table] [new_table]
-            rename [table] [col] [new_col]"""
-        args = line.split()
-        type = args[0]
-        if type == 'table' and len(args) != 3:
-            print("Invalid syntax. Format: rename table table_name new_table_name") 
-            return
-        elif type == 'col' and len(args) != 4:
-            print("Invalid syntax. Format: rename col table_name col_name new_col_name") 
-            return
+    # def do_rename(self, line):
+    #     """Rename table name or column name. 
+    #     Usage: rename [table] [new_table]
+    #         rename [table] [col] [new_col]"""
+    #     args = line.split()
+    #     type = args[0]
+    #     if type == 'table' and len(args) != 3:
+    #         print("Invalid syntax. Format: rename table table_name new_table_name") 
+    #         return
+    #     elif type == 'col' and len(args) != 4:
+    #         print("Invalid syntax. Format: rename col table_name col_name new_col_name") 
+    #         return
 
-        if type == 'table':
-            old_name = args[1]
-            new_name = args[2]
+    #     if type == 'table':
+    #         old_name = args[1]
+    #         new_name = args[2]
 
-            sql = "ALTER TABLE {} RENAME TO {}".format(old_name, new_name)
-            print(sql)
-            self.db.cursor.execute(sql)
+    #         sql = "ALTER TABLE {} RENAME TO {}".format(old_name, new_name)
+    #         print(sql)
+    #         self.db.cursor.execute(sql)
 
-        elif type == 'col':
-            table_name = args[1]
-            old_name = args[2]
-            new_name = args[3]
+    #     elif type == 'col':
+    #         table_name = args[1]
+    #         old_name = args[2]
+    #         new_name = args[3]
 
-            sql = "ALTER TABLE {} RENAME COLUMN {} to {}".format(table_name, old_name, new_name)
+    #         sql = "ALTER TABLE {} RENAME COLUMN {} to {}".format(table_name, old_name, new_name)
 
         
         
