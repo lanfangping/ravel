@@ -1,4 +1,4 @@
-from ravel.app import AppConsole
+from ravel.app import AppConsole, mk_watchcmd
 import psycopg2
 import tabulate
 import re
@@ -406,6 +406,21 @@ class BGPConsole(AppConsole):
             pass
         except TypeError as e:
             print(e)
+
+    def do_watch(self, line):
+        """Launch an xterm window to watch database tables in real-time
+           Usage: watch [table1(,max_rows)] [table2(,max_rows)] ...
+           Example: watch hosts switches cf,5"""
+        if not line:
+            return
+
+        args = line.split()
+        if len(args) == 0:
+            print("Invalid syntax")
+            return
+
+        cmd, cmdfile = mk_watchcmd(self.env.db, args)
+        self.env.mkterm(cmd, cmdfile)
     
         
     '''
