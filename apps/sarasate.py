@@ -105,7 +105,7 @@ class RelaAlgConsole(AppConsole):
         table_list = from_clause.split(',')
         if len(table_list) > 1:
 
-            print('join')
+            # print('join')
             t1_name = table_list[0].strip()
             t2_name = table_list[1].strip()
             
@@ -246,7 +246,7 @@ class RelaAlgConsole(AppConsole):
         table_list = from_clause.split(',')
         if len(table_list) > 1:
 
-            print('join')
+            # print('join')
             t1_name = table_list[0].strip()
             t2_name = table_list[1].strip()
             
@@ -302,7 +302,7 @@ class RelaAlgConsole(AppConsole):
         table_list = from_clause.split(',')
         if len(table_list) > 1:
 
-            print('join')
+            # print('join')
             t1_name = table_list[0].strip()
             t2_name = table_list[1].strip()
             
