@@ -11,7 +11,9 @@ class BGPConsole(AppConsole):
         print("test", line)
 
     def default(self, line):
-        "Execute a PostgreSQL statement"
+        """
+        Execute a PostgreSQL statement
+        """
         try:
             select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
             self.generator(select_clause, from_clause, defined_where_clause, where_lists)
@@ -250,8 +252,14 @@ class BGPConsole(AppConsole):
         # rib_file = args[0]
         # upd_file = args[1]
         ptable, rtable, update_table = self._gen_ptable()
+        
+        self.db.cursor.execute("DROP TABLE IF EXISTS bgp_policy;")
         self.db.cursor.executemany("INSERT INTO bgp_policy VALUES (%s, %s, %s, %s);", ptable)
+
+        self.db.cursor.execute("DROP TABLE IF EXISTS routes;")
         self.db.cursor.executemany("INSERT INTO routes(dest, path, min_len) VALUES (%s, %s, %s);", rtable)
+
+        self.db.cursor.execute("DROP TABLE IF EXISTS routes_delta;")
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
     
     def do_loaddemo(self, line):
@@ -284,16 +292,24 @@ class BGPConsole(AppConsole):
             ['1.6.188.0/24', 'A','2914 6453 9583',  3 ],
             ['1.22.208.0/24', 'A', '3130 2914 1299 9498 45528', 5]
         ]
-
+        self.db.cursor.execute("DROP TABLE IF EXISTS bgp_policy;")
         self.db.cursor.executemany("INSERT INTO bgp_policy VALUES (%s, %s, %s, %s);", ptable)
+
+        self.db.cursor.execute("DROP TABLE IF EXISTS routes;")
         self.db.cursor.executemany("INSERT INTO routes(dest, path, min_len) VALUES (%s, %s, %s);", rtable)
+
+        self.db.cursor.execute("DROP TABLE IF EXISTS current_best_routes;")
         self.db.cursor.executemany("INSERT INTO current_best_routes(dest, path, min_len) VALUES (%s, %s, %s);", current_best_routes)
+        
+        self.db.cursor.execute("DROP TABLE IF EXISTS routes_delta;")
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
 
 
     def do_extend_values(self, line):
-        """Extend values in condtion column to variables and rename the table name
-        Usage: extend_values [table] [new_name] ..."""
+        """
+        Extend values in condtion column to variables and rename the table name
+        Usage: extend_values [table] [new_name] ...
+        """
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -334,8 +350,10 @@ class BGPConsole(AppConsole):
     arg2: routes_delta
     '''
     def do_update_policy(self, line):
-        """Update current bgp policy that are affected by bgp announcement
-        Usage: update_policy [policy] [delta]"""
+        """
+        Update current bgp policy that are affected by bgp announcement
+        Usage: update_policy [policy] [delta]
+        """
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -366,8 +384,10 @@ class BGPConsole(AppConsole):
     arg2: routes_delta
     '''
     def do_union(self, line):
-        """Union operation. 
-        Usage: union [table1] [table2]"""
+        """
+        Union operation. 
+        Usage: union [table1] [table2]
+        """
         args = line.split()
         if len(args) != 2:
             print("Invalid syntax") 
@@ -412,13 +432,17 @@ class BGPConsole(AppConsole):
             print(e)
 
     def do_data(self, line):
-        "Create data content."
+        """
+        Create data content.
+        """
 
         select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
         self._data(select_clause, from_clause, defined_where_clause, where_lists)
 
     def do_condition(self, line):
-        "Update Conditions"
+        """
+        Update Conditions
+        """
         select_clause, from_clause, defined_where_clause, where_lists = self.pre_processing(line)
         self._condition(select_clause, from_clause, defined_where_clause, where_lists)
 
@@ -595,9 +619,11 @@ class BGPConsole(AppConsole):
         self.db.cursor.execute(sql)
 
     def do_watch(self, line):
-        """Launch an xterm window to watch database tables in real-time
-           Usage: watch [table1(,max_rows)] [table2(,max_rows)] ...
-           Example: watch hosts switches cf,5"""
+        """
+        Launch an xterm window to watch database tables in real-time
+        Usage: watch [table1(,max_rows)] [table2(,max_rows)] ...
+        Example: watch hosts switches cf,5
+        """
         if not line:
             return
 
