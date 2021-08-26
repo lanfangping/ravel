@@ -253,13 +253,13 @@ class BGPConsole(AppConsole):
         # upd_file = args[1]
         ptable, rtable, update_table = self._gen_ptable()
         
-        self.db.cursor.execute("DROP TABLE IF EXISTS bgp_policy;")
+        self.db.cursor.execute("TRUNCATE TABLE bgp_policy CASCADE;")
         self.db.cursor.executemany("INSERT INTO bgp_policy VALUES (%s, %s, %s, %s);", ptable)
 
-        self.db.cursor.execute("DROP TABLE IF EXISTS routes;")
+        self.db.cursor.execute("TRUNCATE TABLE routes CASCADE;")
         self.db.cursor.executemany("INSERT INTO routes(dest, path, min_len) VALUES (%s, %s, %s);", rtable)
 
-        self.db.cursor.execute("DROP TABLE IF EXISTS routes_delta;")
+        self.db.cursor.execute("TRUNCATE TABLE routes_delta CASCADE;")
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
     
     def do_loaddemo(self, line):
@@ -292,16 +292,16 @@ class BGPConsole(AppConsole):
             ['1.6.188.0/24', 'A','2914 6453 9583',  3 ],
             ['1.22.208.0/24', 'A', '3130 2914 1299 9498 45528', 5]
         ]
-        self.db.cursor.execute("DROP TABLE IF EXISTS bgp_policy;")
+        self.db.cursor.execute("TRUNCATE TABLE bgp_policy CASCADE;")
         self.db.cursor.executemany("INSERT INTO bgp_policy VALUES (%s, %s, %s, %s);", ptable)
 
-        self.db.cursor.execute("DROP TABLE IF EXISTS routes;")
+        self.db.cursor.execute("TRUNCATE TABLE routes CASCADE;")
         self.db.cursor.executemany("INSERT INTO routes(dest, path, min_len) VALUES (%s, %s, %s);", rtable)
 
-        self.db.cursor.execute("DROP TABLE IF EXISTS current_best_routes;")
+        self.db.cursor.execute("TRUNCATE TABLE current_best_routes CASCADE;")
         self.db.cursor.executemany("INSERT INTO current_best_routes(dest, path, min_len) VALUES (%s, %s, %s);", current_best_routes)
         
-        self.db.cursor.execute("DROP TABLE IF EXISTS routes_delta;")
+        self.db.cursor.execute("TRUNCATE TABLE routes_delta CASCADE;")
         self.db.cursor.executemany("INSERT INTO routes_delta(dest, operation, path, len_path) VALUES (%s, %s, %s, %s);", update_table)
 
 
